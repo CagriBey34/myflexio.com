@@ -1,0 +1,13 @@
+
+# Uploads
+backend/uploads/
+
+backend/node_modules/
+frontend/node_modules/
+
+# Environment
+backend/.env
+frontend/.env
+
+# DS Store
+.DS_Store

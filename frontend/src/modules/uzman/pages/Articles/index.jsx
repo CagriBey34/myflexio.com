@@ -51,41 +51,43 @@ export default function UzmanArticles() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20">
-      <ArticleHeader onNew={() => navigate('/uzman/articles/new')} />
+    <div className="bg-[#f0fdf4] min-h-screen py-12 px-4 md:px-8">
+        <div className="max-w-6xl mx-auto space-y-8 pb-20">
+        <ArticleHeader onNew={() => navigate('/uzman/articles/new')} />
 
-      <ArticleTabSystem activeTab={activeTab} setActiveTab={(tab) => { setActiveTab(tab); setPage(1); }} />
+        <ArticleTabSystem activeTab={activeTab} setActiveTab={(tab) => { setActiveTab(tab); setPage(1); }} />
 
-      <div className="space-y-6">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Makaleler Yükleniyor...</p>
-          </div>
-        ) : articles.length === 0 ? (
-          <ArticleEmptyState onNew={() => navigate('/uzman/articles/new')} />
-        ) : (
-          <AnimatePresence mode="popLayout">
-            {articles.map((article) => (
-              <ArticleManagementCard 
-                key={article.id} 
-                article={article} 
-                onDelete={handleDelete}
-                onStatusChange={handleStatusChange}
-              />
-            ))}
-          </AnimatePresence>
-        )}
-      </div>
-
-      {/* Pagination Bento Style */}
-      {total > 10 && (
-        <div className="flex justify-center items-center gap-6 bg-white w-fit mx-auto p-2 rounded-3xl border border-slate-100 shadow-xl mt-12">
-            <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="p-4 rounded-2xl hover:bg-slate-50 disabled:opacity-30">←</button>
-            <span className="font-black text-slate-900 italic text-sm">Sayfa {page} / {Math.ceil(total / 10)}</span>
-            <button disabled={page >= Math.ceil(total / 10)} onClick={() => setPage(p => p + 1)} className="p-4 rounded-2xl hover:bg-slate-50 disabled:opacity-30">→</button>
+        <div className="space-y-6">
+            {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <div className="w-10 h-10 border-4 border-[#4ade80] border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs font-black text-[#0a2e1a] uppercase tracking-widest">Makaleler Yükleniyor...</p>
+            </div>
+            ) : articles.length === 0 ? (
+            <ArticleEmptyState onNew={() => navigate('/uzman/articles/new')} />
+            ) : (
+            <AnimatePresence mode="popLayout">
+                {articles.map((article) => (
+                <ArticleManagementCard 
+                    key={article.id} 
+                    article={article} 
+                    onDelete={handleDelete}
+                    onStatusChange={handleStatusChange}
+                />
+                ))}
+            </AnimatePresence>
+            )}
         </div>
-      )}
+
+        {/* Pagination Bento Style */}
+        {total > 10 && (
+            <div className="flex justify-center items-center gap-6 bg-white w-fit mx-auto p-2 rounded-full border border-gray-100 shadow-xl shadow-green-900/5 mt-12">
+                <button disabled={page === 1} onClick={() => setPage(p => p - 1)} className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-50 disabled:opacity-30 text-[#0a2e1a] transition-colors font-black">←</button>
+                <span className="font-black text-[#0a2e1a] text-sm tracking-widest">SAYFA {page} / {Math.ceil(total / 10)}</span>
+                <button disabled={page >= Math.ceil(total / 10)} onClick={() => setPage(p => p + 1)} className="w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-50 disabled:opacity-30 text-[#0a2e1a] transition-colors font-black">→</button>
+            </div>
+        )}
+        </div>
     </div>
   );
 }

@@ -160,12 +160,6 @@ export default function HastaUzmanProfile() {
               >
                 <Calendar size={18} /> Ücretsiz Ön Görüşme
               </button>
-              <button
-                onClick={() => setShowRandevuModal(true)}
-                className="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-blue-200 transition-all active:scale-[0.98]"
-              >
-                <Calendar size={18} /> Randevu Al
-              </button>
             </div>
           </div>
         </div>
@@ -221,7 +215,8 @@ export default function HastaUzmanProfile() {
                         {kategori.replace(/([A-Z])/g, ' $1').trim()}
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {alanlar.map((alan, idx) => (
+                        {/* Verideki tekrar eden uzmanlık alanlarını engellemek için Set kullanıldı */}
+                        {[...new Set(alanlar)].map((alan, idx) => (
                           <span
                             key={idx}
                             className="px-4 py-2 bg-blue-50 text-blue-700 rounded-2xl text-xs font-black border border-blue-100 shadow-sm"
@@ -311,38 +306,6 @@ export default function HastaUzmanProfile() {
               </div>
             </motion.div>
           )}
-          {/* Makaleler */}
-{profile.makaleler && profile.makaleler.length > 0 && (
-    <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.2 }}
-        className="bg-white rounded-[2.5rem] p-8 md:p-10 border border-slate-100 shadow-sm"
-    >
-        <h2 className="text-xl font-black text-slate-900 mb-6 uppercase tracking-tighter flex items-center gap-3">
-            <FileText className="text-blue-600" size={20}/> Makalelerim
-        </h2>
-        <div className="space-y-4">
-            {profile.makaleler.map((makale) => (
-                <div
-                    key={makale.id}
-                    onClick={() => navigate(`/articles/${makale.id}`)}
-                    className="group flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 rounded-2xl cursor-pointer transition-all"
-                >
-                    <div className="flex-1 min-w-0">
-                        <p className="font-black text-slate-900 text-sm truncate group-hover:text-blue-700 transition-colors">
-                            {makale.baslik}
-                        </p>
-                        <p className="text-xs text-slate-400 mt-1">
-                            {new Date(makale.created_at).toLocaleDateString('tr-TR')}
-                        </p>
-                    </div>
-                    <ArrowRight size={18} className="text-slate-300 group-hover:text-blue-600 transition-colors flex-shrink-0 ml-4" />
-                </div>
-            ))}
-        </div>
-    </motion.div>
-)}
         </div>
       </div>
     </div>

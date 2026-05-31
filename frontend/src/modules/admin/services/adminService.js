@@ -87,3 +87,33 @@ export const getUzmanDetail = async (id) => {
     const response = await api.get(`/admin/uzmanlar-list/${id}`);
     return response.data;
 };
+
+export const getTedaviPlanlari = async () => {
+    const response = await api.get('/admin/tedavi-planlari');
+    return response.data;
+};
+
+export const aktiveTedaviPlaniAdmin = async (id) => {
+    const response = await api.patch(`/admin/tedavi-plani/${id}/aktifet`);
+    return response.data;
+};
+
+export const getSistemIban = async () => {
+    const response = await api.get('/admin/sistem-iban');
+    return response.data;
+};
+
+export const setSistemIban = async (data) => {
+    const response = await api.put('/admin/sistem-iban', data);
+    return response.data;
+};
+
+export const getAktifEslesmeler = async () => {
+    const response = await api.get('/admin/aktif-eslesmeler');
+    return response.data;
+};
+
+export const getAdminEslesmeSeanslari = async (planId) => {
+    const response = await api.get(`/admin/eslesmeler/${planId}/seanslar`);
+    return response.data;
+};

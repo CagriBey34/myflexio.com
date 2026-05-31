@@ -1,7 +1,69 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Check, X, ChevronDown, ShieldCheck, Clock, XCircle } from 'lucide-react';
+import { Eye, Check, X, ChevronDown, ShieldCheck, Clock, XCircle, ExternalLink, FileText } from 'lucide-react';
 import { getUzmanApplications, updateApplicationStatus } from '../../services/adminService';
+
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/api$/, '');
+
+const getDiplomaUrl = (path) => `${API_BASE}${path}`;
+
+const isPdf = (url) => url?.toLowerCase().endsWith('.pdf');
+
+function DiplomaModal({ url, onClose }) {
+    const fullUrl = getDiplomaUrl(url);
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+            onClick={onClose}
+        >
+            <div
+                className="bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col w-full max-w-3xl max-h-[90vh]"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                        <FileText size={18} className="text-blue-600" />
+                        <span className="font-black text-slate-800 text-sm uppercase tracking-widest">
+                            Diploma Belgesi
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <a
+                            href={fullUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 text-xs font-black text-blue-600 hover:text-blue-800 uppercase tracking-widest border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all"
+                        >
+                            <ExternalLink size={12} /> Yeni Sekmede Aç
+                        </a>
+                        <button
+                            onClick={onClose}
+                            className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-red-100 hover:text-red-600 text-slate-500 transition-all"
+                        >
+                            <X size={15} />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex-1 overflow-auto bg-slate-50 flex items-center justify-center min-h-[400px]">
+                    {isPdf(url) ? (
+                        <iframe
+                            src={fullUrl}
+                            className="w-full h-[70vh]"
+                            title="Diploma Belgesi"
+                        />
+                    ) : (
+                        <img
+                            src={fullUrl}
+                            alt="Diploma"
+                            className="max-w-full max-h-[70vh] object-contain rounded-lg shadow"
+                        />
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
 
 const STATUS_CONFIG = {
     pending_approval: { label: 'Bekliyor', color: 'bg-amber-100 text-amber-700 border-amber-200' },
@@ -10,7 +72,7 @@ const STATUS_CONFIG = {
 };
 
 const FILTERS = [
-    { key: 'pending_approval',  label: 'Bekleyenler' },
+    { key: 'pending_approval', label: 'Bekleyenler' },
     { key: 'active', label: 'Onaylananlar' },
     { key: 'rejected', label: 'Reddedilenler' },
 ];
@@ -18,6 +80,7 @@ const FILTERS = [
 function BasvuruRow({ app, onUpdate }) {
     const [expanded, setExpanded] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [diplomaOpen, setDiplomaOpen] = useState(false);
     const status = STATUS_CONFIG[app.status] || STATUS_CONFIG.pending_approval;
 
     const handleAction = async (newStatus) => {
@@ -34,115 +97,122 @@ function BasvuruRow({ app, onUpdate }) {
     };
 
     return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl border-2 border-slate-100 overflow-hidden shadow-sm hover:border-blue-100 transition-all"
-        >
-            {/* Ana satır */}
-            <div
-                className="flex items-center gap-4 p-5 cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => setExpanded(!expanded)}
+        <>
+            <motion.div
+                layout
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl border-2 border-slate-100 overflow-hidden shadow-sm hover:border-blue-100 transition-all"
             >
-                {/* Avatar */}
-                <div className="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center font-black text-blue-600 text-base flex-shrink-0">
-                    {app.ad?.[0]}{app.soyad?.[0]}
-                </div>
-
-                {/* Bilgiler */}
-                <div className="flex-1 min-w-0">
-                    <p className="font-black text-slate-900 tracking-tight truncate">
-                        {app.ad} {app.soyad}
-                        {app.unvan && (
-                            <span className="text-blue-600 font-bold text-xs ml-2 uppercase tracking-widest">
-                                {app.unvan}
-                            </span>
-                        )}
-                    </p>
-                    <p className="text-xs text-slate-400 font-semibold truncate">{app.email}</p>
-                </div>
-
-                {/* Mezuniyet */}
-                {app.mezuniyet_okul && (
-                    <div className="hidden sm:block text-right flex-shrink-0">
-                        <p className="text-xs font-bold text-slate-700 truncate max-w-[160px]">
-                            {app.mezuniyet_okul}
-                        </p>
-                        <p className="text-[10px] text-slate-400">{app.mezuniyet_yili}</p>
+                {/* Ana satır */}
+                <div
+                    className="flex items-center gap-4 p-5 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => setExpanded(!expanded)}
+                >
+                    {/* Avatar */}
+                    <div className="w-11 h-11 rounded-2xl bg-blue-50 flex items-center justify-center font-black text-blue-600 text-base flex-shrink-0">
+                        {app.ad?.[0]}{app.soyad?.[0]}
                     </div>
-                )}
 
-                {/* Tarih */}
-                <div className="flex-shrink-0 text-right hidden md:block">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {new Date(app.created_at).toLocaleDateString('tr-TR')}
-                    </p>
+                    {/* Bilgiler */}
+                    <div className="flex-1 min-w-0">
+                        <p className="font-black text-slate-900 tracking-tight truncate">
+                            {app.ad} {app.soyad}
+                            {app.unvan && (
+                                <span className="text-blue-600 font-bold text-xs ml-2 uppercase tracking-widest">
+                                    {app.unvan}
+                                </span>
+                            )}
+                        </p>
+                        <p className="text-xs text-slate-400 font-semibold truncate">{app.email}</p>
+                    </div>
+
+                    {/* Mezuniyet */}
+                    {app.mezuniyet_okul && (
+                        <div className="hidden sm:block text-right flex-shrink-0">
+                            <p className="text-xs font-bold text-slate-700 truncate max-w-[160px]">
+                                {app.mezuniyet_okul}
+                            </p>
+                            <p className="text-[10px] text-slate-400">{app.mezuniyet_yili}</p>
+                        </div>
+                    )}
+
+                    {/* Tarih */}
+                    <div className="flex-shrink-0 text-right hidden md:block">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            {new Date(app.created_at).toLocaleDateString('tr-TR')}
+                        </p>
+                    </div>
+
+                    {/* Durum */}
+                    <span className={`flex-shrink-0 text-[10px] font-black px-2.5 py-1 rounded-full border ${status.color}`}>
+                        {status.label}
+                    </span>
+
+                    <ChevronDown
+                        size={15}
+                        className={`text-slate-400 flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`}
+                    />
                 </div>
 
-                {/* Durum */}
-                <span className={`flex-shrink-0 text-[10px] font-black px-2.5 py-1 rounded-full border ${status.color}`}>
-                    {status.label}
-                </span>
+                {/* Detay paneli */}
+                <AnimatePresence>
+                    {expanded && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden border-t border-slate-100"
+                        >
+                            <div className="p-5 bg-slate-50 flex flex-wrap items-center gap-3">
 
-                <ChevronDown
-                    size={15}
-                    className={`text-slate-400 flex-shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`}
-                />
-            </div>
-
-            {/* Detay paneli */}
-            <AnimatePresence>
-                {expanded && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden border-t border-slate-100"
-                    >
-                        <div className="p-5 bg-slate-50 flex flex-wrap items-center gap-3">
-
-                            {/* Diploma butonu */}
-                            {app.diploma_url && (
-                                <button
-                                    onClick={() => window.open(app.diploma_url, '_blank')}
-                                    className="flex items-center gap-2 bg-white border-2 border-slate-200 text-slate-600 text-xs font-black px-4 py-2.5 rounded-xl uppercase tracking-widest hover:border-blue-300 hover:text-blue-600 transition-all"
-                                >
-                                    <Eye size={14} /> Diploma Görüntüle
-                                </button>
-                            )}
-
-                            {/* Onay/Red butonları sadece pending'de */}
-                            {app.status === 'pending_approval' && (
-                                <>
+                                {/* Diploma butonu */}
+                                {app.diploma_url && (
                                     <button
-                                        onClick={() => handleAction('active')}
-                                        disabled={loading}
-                                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-xs font-black px-5 py-2.5 rounded-xl uppercase tracking-widest transition-colors disabled:opacity-50"
+                                        onClick={() => setDiplomaOpen(true)}
+                                        className="flex items-center gap-2 bg-white border-2 border-slate-200 text-slate-600 text-xs font-black px-4 py-2.5 rounded-xl uppercase tracking-widest hover:border-blue-300 hover:text-blue-600 transition-all"
                                     >
-                                        <Check size={14} />
-                                        {loading ? 'İşleniyor...' : 'Onayla'}
+                                        <Eye size={14} /> Diploma Görüntüle
                                     </button>
-                                    <button
-                                        onClick={() => handleAction('rejected')}
-                                        disabled={loading}
-                                        className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-black px-5 py-2.5 rounded-xl uppercase tracking-widest transition-colors disabled:opacity-50"
-                                    >
-                                        <X size={14} /> Reddet
-                                    </button>
-                                </>
-                            )}
+                                )}
 
-                            {/* Tarih mobilde */}
-                            <span className="ml-auto text-xs text-slate-400 font-semibold md:hidden">
-                                {new Date(app.created_at).toLocaleDateString('tr-TR')}
-                            </span>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </motion.div>
+                                {/* Onay/Red butonları sadece pending'de */}
+                                {app.status === 'pending_approval' && (
+                                    <>
+                                        <button
+                                            onClick={() => handleAction('active')}
+                                            disabled={loading}
+                                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-xs font-black px-5 py-2.5 rounded-xl uppercase tracking-widest transition-colors disabled:opacity-50"
+                                        >
+                                            <Check size={14} />
+                                            {loading ? 'İşleniyor...' : 'Onayla'}
+                                        </button>
+                                        <button
+                                            onClick={() => handleAction('rejected')}
+                                            disabled={loading}
+                                            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-black px-5 py-2.5 rounded-xl uppercase tracking-widest transition-colors disabled:opacity-50"
+                                        >
+                                            <X size={14} /> Reddet
+                                        </button>
+                                    </>
+                                )}
+
+                                {/* Tarih mobilde */}
+                                <span className="ml-auto text-xs text-slate-400 font-semibold md:hidden">
+                                    {new Date(app.created_at).toLocaleDateString('tr-TR')}
+                                </span>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </motion.div>
+
+            {/* Diploma önizleme modalı */}
+            {diplomaOpen && app.diploma_url && (
+                <DiplomaModal url={app.diploma_url} onClose={() => setDiplomaOpen(false)} />
+            )}
+        </>
     );
 }
 

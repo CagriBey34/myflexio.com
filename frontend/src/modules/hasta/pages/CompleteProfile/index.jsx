@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { completeProfile, uploadMedicalReport } from '../../services/hastaService';
+import { completeProfile, uploadMedicalReport, getProfile } from '../../services/hastaService';
 
 // Alt Bileşenler
 import Step1Location from './components/Step1Location';
@@ -13,8 +13,9 @@ export default function CompleteProfile() {
     const navigate = useNavigate();
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [initLoading, setInitLoading] = useState(true);
     const [error, setError] = useState('');
-    
+
     const [formData, setFormData] = useState({
         sehir: '', ilce: '', dogumTarihi: '', cinsiyet: '',
         agriBolgesi: [], tedaviTercihi: '', agriSeviyesi: 5,
@@ -23,6 +24,45 @@ export default function CompleteProfile() {
         surekliIlac: false, ilacListesi: '', alerjiler: '',
         medicalReport: null, reportType: 'diger', reportDescription: '',
     });
+
+    useEffect(() => {
+        const loadExisting = async () => {
+            try {
+                const res = await getProfile();
+                const p = res.data;
+                if (p?.profile_completed_at) {
+                    let dogumTarihi = '';
+                    if (p.dogum_tarihi) {
+                        dogumTarihi = p.dogum_tarihi.split('T')[0];
+                    }
+                    setFormData(prev => ({
+                        ...prev,
+                        sehir: p.sehir || '',
+                        ilce: p.ilce || '',
+                        dogumTarihi,
+                        cinsiyet: p.cinsiyet || '',
+                        agriBolgesi: p.agri_bolgesi
+                            ? p.agri_bolgesi.split(',').map(s => s.trim()).filter(Boolean)
+                            : [],
+                        tedaviTercihi: p.tedavi_tercihi || '',
+                        agriSeviyesi: p.agri_seviyesi || 5,
+                        ameliyatGecmisi: !!p.ameliyat_gecmisi,
+                        ameliyatDetay: p.ameliyat_detay || '',
+                        kronikHastalik: !!p.kronik_hastalik,
+                        kronikHastalikDetay: p.kronik_hastalik_detay || '',
+                        surekliIlac: !!p.surekli_ilac,
+                        ilacListesi: p.ilac_listesi || '',
+                        alerjiler: p.alerjiler || '',
+                    }));
+                }
+            } catch {
+                // profil yoksa boş başlar
+            } finally {
+                setInitLoading(false);
+            }
+        };
+        loadExisting();
+    }, []);
 
     const totalSteps = 3;
 
@@ -59,6 +99,14 @@ export default function CompleteProfile() {
             setLoading(false);
         }
     };
+
+    if (initLoading) {
+        return (
+            <div className="w-full h-[calc(100dvh-120px)] flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="w-full h-[calc(100dvh-120px)] flex items-center justify-center px-4 overflow-hidden">

@@ -59,3 +59,32 @@ export const getMedicalReports = async () => {
     const response = await api.get('/hasta/reports');
     return response.data;
 };
+
+export const getHastaTedaviPlani = async () => {
+    const response = await api.get('/hasta/tedavi-plani');
+    return response.data;
+};
+
+export const uploadDekont = async (planId, file) => {
+    const formData = new FormData();
+    formData.append('dekont', file);
+    const response = await api.post(`/hasta/tedavi-plani/${planId}/dekont`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+};
+
+export const hastaSeansAl = async (randevuId) => {
+    const response = await api.patch(`/hasta/randevu/${randevuId}/seans-al`);
+    return response.data;
+};
+
+export const getHastaSeanslari = async () => {
+    const response = await api.get('/hasta/seanslar');
+    return response.data;
+};
+
+export const hastaSeansOnay = async (seansId) => {
+    const response = await api.patch(`/hasta/seanslar/${seansId}/seans-al`);
+    return response.data;
+};

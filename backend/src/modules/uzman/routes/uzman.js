@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { registerUzman, completeProfile, getProfile, getUzmanRandevular, setKesinTarih } from '../controllers/uzmanController.js';
+import { registerUzman, completeProfile, getProfile, getUzmanRandevular, setKesinTarih, createTedaviPlani, updateIban, getUzmanTedaviPlanlari, aktiveTedaviPlani, uzmanSeansVer, getUzmanEslesmeler, getEslesmeSeanslariUzman, setSeansTargihi, uzmanSeansOnay } from '../controllers/uzmanController.js';
 import {
     getUzmanArticles,
     getUzmanArticleById,
@@ -72,5 +72,18 @@ router.get('/reviews', authenticate, getUzmanOwnReviews);
 // Randevu routes
 router.get('/randevular', authenticate, getUzmanRandevular);
 router.patch('/randevular/:id/kesin-tarih', authenticate, setKesinTarih);
+router.patch('/randevular/:id/seans-ver', authenticate, uzmanSeansVer);
+
+// Tedavi planı routes
+router.post('/tedavi-plani', authenticate, createTedaviPlani);
+router.get('/tedavi-planlari', authenticate, getUzmanTedaviPlanlari);
+router.patch('/tedavi-plani/:id/aktifet', authenticate, aktiveTedaviPlani);
+router.patch('/profile/iban', authenticate, updateIban);
+
+// Eşleşme & seans routes
+router.get('/eslesmeler', authenticate, getUzmanEslesmeler);
+router.get('/eslesmeler/:planId/seanslar', authenticate, getEslesmeSeanslariUzman);
+router.patch('/seanslar/:seansId/tarih', authenticate, setSeansTargihi);
+router.patch('/seanslar/:seansId/seans-ver', authenticate, uzmanSeansOnay);
 
 export default router;

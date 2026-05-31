@@ -122,24 +122,41 @@ export const completeProfile = async (req, res) => {
             sehir,
             ilce,
             uzmanlikAlanlari,
-            sertifikalar
+            sertifikalar,
+            onlineSeansucreti,
+            evdeSeansucreti,
+            ibanNo,
+            ibanAdSoyad
         } = req.body;
 
         await connection.beginTransaction();
 
-        // Get profile foto if uploaded
+        // Only update photo if a new one was uploaded
         const profilFotografUrl = req.files?.profilFotograf
             ? `/uploads/profil-fotograflar/${req.files.profilFotograf[0].filename}`
             : null;
 
-        // Update uzman profile
+        const updateFields = [
+            'dogum_tarihi = ?', 'cinsiyet = ?', 'biyografi = ?',
+            'mezuniyet_okul = ?', 'mezuniyet_yili = ?', 'sehir = ?', 'ilce = ?',
+            'online_seans_ucreti = ?', 'evde_seans_ucreti = ?', 'iban_no = ?', 'iban_ad_soyad = ?',
+            'profile_completed_at = NOW()'
+        ];
+        const updateValues = [
+            dogumTarihi, cinsiyet, biyografi,
+            mezuniyetOkul, mezuniyetYili, sehir, ilce,
+            onlineSeansucreti || null, evdeSeansucreti || null, ibanNo || null, ibanAdSoyad || null
+        ];
+
+        if (profilFotografUrl) {
+            updateFields.splice(2, 0, 'profil_fotograf_url = ?');
+            updateValues.splice(2, 0, profilFotografUrl);
+        }
+        updateValues.push(userId);
+
         await connection.execute(
-            `UPDATE uzman_profiles SET 
-       dogum_tarihi = ?, cinsiyet = ?, profil_fotograf_url = ?, biyografi = ?,
-       mezuniyet_okul = ?, mezuniyet_yili = ?, sehir = ?, ilce = ?,
-       profile_completed_at = NOW()
-       WHERE user_id = ?`,
-            [dogumTarihi, cinsiyet, profilFotografUrl, biyografi, mezuniyetOkul, mezuniyetYili, sehir, ilce, userId]
+            `UPDATE uzman_profiles SET ${updateFields.join(', ')} WHERE user_id = ?`,
+            updateValues
         );
 
         // Get uzman profile id
@@ -149,8 +166,13 @@ export const completeProfile = async (req, res) => {
         );
         const profileId = profiles[0].id;
 
-        // Insert uzmanlik alanlari
+        // Delete existing uzmanlik alanlari before re-inserting (prevent duplicates on edit)
         if (uzmanlikAlanlari) {
+            await connection.execute(
+                'DELETE FROM uzmanlik_alanlari WHERE uzman_profile_id = ?',
+                [profileId]
+            );
+
             const parsedAlanlari = typeof uzmanlikAlanlari === 'string'
                 ? JSON.parse(uzmanlikAlanlari)
                 : uzmanlikAlanlari;
@@ -223,6 +245,7 @@ export const getProfile = async (req, res) => {
               up.ad, up.soyad, up.unvan, up.telefon, up.diploma_url,
               up.dogum_tarihi, up.cinsiyet, up.profil_fotograf_url, up.biyografi,
               up.mezuniyet_okul, up.mezuniyet_yili, up.sehir, up.ilce,
+              up.online_seans_ucreti, up.evde_seans_ucreti, up.iban_no,
               up.profile_completed_at
        FROM users u
        LEFT JOIN uzman_profiles up ON u.id = up.user_id
@@ -325,10 +348,16 @@ export const getUzmanRandevular = async (req, res) => {
                     hp.surekli_ilac as hasta_surekli_ilac,
                     hp.ilac_listesi as hasta_ilac_listesi,
                     hp.alerjiler as hasta_alerjiler,
-                    u.email as hasta_email
+                    u.email as hasta_email,
+                    CASE WHEN tp.id IS NOT NULL THEN 1 ELSE 0 END as eslesme_var
              FROM randevular r
              INNER JOIN hasta_profiles hp ON r.hasta_profile_id = hp.id
              INNER JOIN users u ON hp.user_id = u.id
+             LEFT JOIN tedavi_planlari tp ON (
+                 tp.uzman_profile_id = r.uzman_profile_id
+                 AND tp.hasta_profile_id = r.hasta_profile_id
+                 AND tp.durum = 'aktif'
+             )
              WHERE r.uzman_profile_id = ?
              ORDER BY r.created_at DESC`,
             [uzman_profile_id]
@@ -422,3 +451,363 @@ export const setKesinTarih = async (req, res) => {
     }
 };
 
+/**
+ * Create treatment plan for a patient
+ * POST /api/uzman/tedavi-plani
+ */
+export const createTedaviPlani = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { hastaProfileId, randevuId, tedaviTuru, seansSayisi, notlar } = req.body;
+
+        if (!hastaProfileId || !tedaviTuru || !seansSayisi) {
+            return res.status(400).json({ success: false, message: 'Eksik alanlar: hastaProfileId, tedaviTuru, seansSayisi zorunludur' });
+        }
+        if (!['online', 'evde'].includes(tedaviTuru)) {
+            return res.status(400).json({ success: false, message: 'tedaviTuru online veya evde olmalıdır' });
+        }
+
+        const [uzmanRows] = await pool.execute(
+            'SELECT id, online_seans_ucreti, evde_seans_ucreti FROM uzman_profiles WHERE user_id = ?',
+            [userId]
+        );
+        if (uzmanRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Uzman profili bulunamadı' });
+        }
+        const uzmanProfile = uzmanRows[0];
+
+        const seansUcreti = tedaviTuru === 'online'
+            ? parseFloat(uzmanProfile.online_seans_ucreti || 0)
+            : parseFloat(uzmanProfile.evde_seans_ucreti || 0);
+
+        const toplamUcret = seansUcreti * parseInt(seansSayisi);
+
+        await pool.execute(
+            `INSERT INTO tedavi_planlari
+             (uzman_profile_id, hasta_profile_id, randevu_id, tedavi_turu, seans_sayisi, seans_ucreti, toplam_ucret, notlar)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [uzmanProfile.id, hastaProfileId, randevuId || null, tedaviTuru, seansSayisi, seansUcreti, toplamUcret, notlar || null]
+        );
+
+        res.status(201).json({ success: true, message: 'Tedavi planı oluşturuldu' });
+    } catch (error) {
+        console.error('createTedaviPlani error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+/**
+ * Get uzman's treatment plans with patient info and payment status
+ * GET /api/uzman/tedavi-planlari
+ */
+export const getUzmanTedaviPlanlari = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const [uzmanRows] = await pool.execute(
+            'SELECT id FROM uzman_profiles WHERE user_id = ?', [userId]
+        );
+        if (uzmanRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Uzman profili bulunamadı' });
+        }
+        const uzmanProfileId = uzmanRows[0].id;
+
+        const [planlar] = await pool.execute(
+            `SELECT tp.id, tp.tedavi_turu, tp.seans_sayisi, tp.seans_ucreti, tp.toplam_ucret,
+                    tp.notlar, tp.durum, tp.dekont_url, tp.created_at,
+                    hp.ad AS hasta_ad, hp.soyad AS hasta_soyad, hp.telefon AS hasta_telefon
+             FROM tedavi_planlari tp
+             INNER JOIN hasta_profiles hp ON tp.hasta_profile_id = hp.id
+             WHERE tp.uzman_profile_id = ?
+             ORDER BY tp.created_at DESC`,
+            [uzmanProfileId]
+        );
+
+        res.status(200).json({ success: true, data: planlar });
+    } catch (error) {
+        console.error('getUzmanTedaviPlanlari error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+/**
+ * Tedavi planını aktifleştir ve seanslar oluştur
+ * @param {number} planId
+ * @param {object} conn - pool connection
+ */
+async function createSeanslariForPlan(planId, conn) {
+    const [[plan]] = await conn.execute(
+        'SELECT seans_sayisi FROM tedavi_planlari WHERE id = ?', [planId]
+    );
+    if (!plan) throw new Error('Plan bulunamadı');
+
+    const inserts = [];
+    for (let i = 1; i <= plan.seans_sayisi; i++) {
+        inserts.push([planId, i, i === 1 ? 'aktif' : 'bekliyor']);
+    }
+    for (const row of inserts) {
+        await conn.execute(
+            `INSERT INTO seanslar (tedavi_plani_id, seans_no, durum)
+             VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE durum = VALUES(durum)`,
+            row
+        );
+    }
+}
+
+/**
+ * Activate a treatment plan after reviewing dekont
+ * PATCH /api/uzman/tedavi-plani/:id/aktifet
+ */
+export const aktiveTedaviPlani = async (req, res) => {
+    const conn = await pool.getConnection();
+    try {
+        const userId = req.user.id;
+        const { id } = req.params;
+
+        const [uzmanRows] = await conn.execute(
+            'SELECT id FROM uzman_profiles WHERE user_id = ?', [userId]
+        );
+        if (uzmanRows.length === 0) {
+            conn.release();
+            return res.status(404).json({ success: false, message: 'Uzman profili bulunamadı' });
+        }
+        const uzmanProfileId = uzmanRows[0].id;
+
+        await conn.beginTransaction();
+
+        const [result] = await conn.execute(
+            `UPDATE tedavi_planlari SET durum = 'aktif'
+             WHERE id = ? AND uzman_profile_id = ? AND durum = 'dekont_yuklendi'`,
+            [id, uzmanProfileId]
+        );
+
+        if (result.affectedRows === 0) {
+            await conn.rollback();
+            conn.release();
+            return res.status(404).json({ success: false, message: 'Plan bulunamadı veya güncellenemez' });
+        }
+
+        await createSeanslariForPlan(id, conn);
+
+        await conn.commit();
+        conn.release();
+        res.status(200).json({ success: true, message: 'Tedavi planı aktifleştirildi' });
+    } catch (error) {
+        await conn.rollback();
+        conn.release();
+        console.error('aktiveTedaviPlani error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+/**
+ * Uzman seans verdiğini onaylar
+ * PATCH /api/uzman/randevular/:id/seans-ver
+ */
+export const uzmanSeansVer = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { id } = req.params;
+
+        const [profiles] = await pool.execute(
+            'SELECT id FROM uzman_profiles WHERE user_id = ?', [userId]
+        );
+        if (profiles.length === 0) {
+            return res.status(404).json({ success: false, message: 'Uzman profili bulunamadı' });
+        }
+        const uzman_profile_id = profiles[0].id;
+
+        const [[randevu]] = await pool.execute(
+            'SELECT id, uzman_seans_onayladi FROM randevular WHERE id = ? AND uzman_profile_id = ?',
+            [id, uzman_profile_id]
+        );
+
+        if (!randevu) {
+            return res.status(404).json({ success: false, message: 'Randevu bulunamadı' });
+        }
+        if (randevu.uzman_seans_onayladi) {
+            return res.status(400).json({ success: false, message: 'Seans zaten onaylanmış' });
+        }
+
+        await pool.execute(
+            'UPDATE randevular SET uzman_seans_onayladi = 1, uzman_seans_onaylama_tarihi = NOW() WHERE id = ?',
+            [id]
+        );
+
+        res.status(200).json({ success: true, message: 'Seans onaylandı' });
+    } catch (error) {
+        console.error('uzmanSeansVer error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+/**
+ * Update uzman IBAN
+ * PATCH /api/uzman/profile/iban
+ */
+export const updateIban = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { ibanNo, ibanAdSoyad } = req.body;
+
+        if (!ibanNo || typeof ibanNo !== 'string' || ibanNo.trim().length < 10) {
+            return res.status(400).json({ success: false, message: 'Geçerli bir IBAN giriniz' });
+        }
+
+        await pool.execute(
+            'UPDATE uzman_profiles SET iban_no = ?, iban_ad_soyad = ? WHERE user_id = ?',
+            [ibanNo.trim().toUpperCase(), ibanAdSoyad?.trim() || null, userId]
+        );
+
+        res.status(200).json({ success: true, message: 'IBAN güncellendi' });
+    } catch (error) {
+        console.error('updateIban error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+/**
+ * Aktif tedavi planları (eşleşmeler) listesi
+ * GET /api/uzman/eslesmeler
+ */
+export const getUzmanEslesmeler = async (req, res) => {
+    try {
+        const [rows] = await pool.execute(
+            'SELECT id FROM uzman_profiles WHERE user_id = ?', [req.user.id]
+        );
+        if (rows.length === 0) return res.status(404).json({ success: false, message: 'Uzman profili bulunamadı' });
+        const uzmanProfileId = rows[0].id;
+
+        const [planlar] = await pool.execute(
+            `SELECT tp.id, tp.tedavi_turu, tp.seans_sayisi, tp.toplam_ucret, tp.created_at,
+                    hp.id AS hasta_profile_id, hp.ad AS hasta_ad, hp.soyad AS hasta_soyad,
+                    hp.telefon AS hasta_telefon,
+                    u.email AS hasta_email,
+                    (SELECT COUNT(*) FROM seanslar s WHERE s.tedavi_plani_id = tp.id) AS toplam_seans,
+                    (SELECT COUNT(*) FROM seanslar s WHERE s.tedavi_plani_id = tp.id AND s.durum = 'tamamlandi') AS tamamlanan_seans,
+                    (SELECT MIN(s2.id) FROM seanslar s2 WHERE s2.tedavi_plani_id = tp.id AND s2.durum = 'aktif') AS aktif_seans_id
+             FROM tedavi_planlari tp
+             INNER JOIN hasta_profiles hp ON tp.hasta_profile_id = hp.id
+             INNER JOIN users u ON hp.user_id = u.id
+             WHERE tp.uzman_profile_id = ? AND tp.durum = 'aktif'
+             ORDER BY tp.created_at DESC`,
+            [uzmanProfileId]
+        );
+        res.status(200).json({ success: true, data: planlar });
+    } catch (error) {
+        console.error('getUzmanEslesmeler error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+/**
+ * Bir eşleşmeye ait tüm seanslar
+ * GET /api/uzman/eslesmeler/:planId/seanslar
+ */
+export const getEslesmeSeanslariUzman = async (req, res) => {
+    try {
+        const [rows] = await pool.execute(
+            'SELECT id FROM uzman_profiles WHERE user_id = ?', [req.user.id]
+        );
+        if (rows.length === 0) return res.status(404).json({ success: false, message: 'Uzman profili bulunamadı' });
+        const uzmanProfileId = rows[0].id;
+
+        const { planId } = req.params;
+        const [[plan]] = await pool.execute(
+            'SELECT id FROM tedavi_planlari WHERE id = ? AND uzman_profile_id = ? AND durum = "aktif"',
+            [planId, uzmanProfileId]
+        );
+        if (!plan) return res.status(403).json({ success: false, message: 'Plan bulunamadı' });
+
+        const [seanslar] = await pool.execute(
+            `SELECT * FROM seanslar WHERE tedavi_plani_id = ? ORDER BY seans_no ASC`,
+            [planId]
+        );
+        res.status(200).json({ success: true, data: seanslar });
+    } catch (error) {
+        console.error('getEslesmeSeanslariUzman error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+/**
+ * Seans tarihi belirle
+ * PATCH /api/uzman/seanslar/:seansId/tarih
+ */
+export const setSeansTargihi = async (req, res) => {
+    try {
+        const [rows] = await pool.execute(
+            'SELECT id FROM uzman_profiles WHERE user_id = ?', [req.user.id]
+        );
+        if (rows.length === 0) return res.status(404).json({ success: false, message: 'Uzman profili bulunamadı' });
+        const uzmanProfileId = rows[0].id;
+
+        const { seansId } = req.params;
+        const { tarih } = req.body;
+
+        const [[seans]] = await pool.execute(
+            `SELECT s.id, s.durum FROM seanslar s
+             INNER JOIN tedavi_planlari tp ON s.tedavi_plani_id = tp.id
+             WHERE s.id = ? AND tp.uzman_profile_id = ?`,
+            [seansId, uzmanProfileId]
+        );
+        if (!seans) return res.status(404).json({ success: false, message: 'Seans bulunamadı' });
+        if (seans.durum !== 'aktif') return res.status(400).json({ success: false, message: 'Sadece aktif seansa tarih belirlenebilir' });
+
+        await pool.execute('UPDATE seanslar SET tarih = ? WHERE id = ?', [tarih, seansId]);
+        res.status(200).json({ success: true, message: 'Tarih kaydedildi' });
+    } catch (error) {
+        console.error('setSeansTargihi error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+/**
+ * Uzman seansı onaylar — her iki taraf onaylarsa seans tamamlanır, sıradaki aktifleşir
+ * PATCH /api/uzman/seanslar/:seansId/seans-ver
+ */
+export const uzmanSeansOnay = async (req, res) => {
+    const conn = await pool.getConnection();
+    try {
+        const [rows] = await conn.execute(
+            'SELECT id FROM uzman_profiles WHERE user_id = ?', [req.user.id]
+        );
+        if (rows.length === 0) { conn.release(); return res.status(404).json({ success: false, message: 'Uzman profili bulunamadı' }); }
+        const uzmanProfileId = rows[0].id;
+
+        const { seansId } = req.params;
+        const [[seans]] = await conn.execute(
+            `SELECT s.* FROM seanslar s
+             INNER JOIN tedavi_planlari tp ON s.tedavi_plani_id = tp.id
+             WHERE s.id = ? AND tp.uzman_profile_id = ?`,
+            [seansId, uzmanProfileId]
+        );
+        if (!seans) { conn.release(); return res.status(404).json({ success: false, message: 'Seans bulunamadı' }); }
+        if (seans.durum !== 'aktif') { conn.release(); return res.status(400).json({ success: false, message: 'Seans aktif değil' }); }
+        if (seans.uzman_seans_onayladi) { conn.release(); return res.status(400).json({ success: false, message: 'Zaten onaylandı' }); }
+
+        await conn.beginTransaction();
+        await conn.execute(
+            'UPDATE seanslar SET uzman_seans_onayladi = 1, uzman_seans_onaylama_tarihi = NOW() WHERE id = ?',
+            [seansId]
+        );
+
+        if (seans.hasta_seans_onayladi) {
+            await conn.execute(`UPDATE seanslar SET durum = 'tamamlandi' WHERE id = ?`, [seansId]);
+            await conn.execute(
+                `UPDATE seanslar SET durum = 'aktif'
+                 WHERE tedavi_plani_id = ? AND seans_no = ? AND durum = 'bekliyor'`,
+                [seans.tedavi_plani_id, seans.seans_no + 1]
+            );
+        }
+        await conn.commit();
+        conn.release();
+        res.status(200).json({ success: true, message: 'Seans onaylandı' });
+    } catch (error) {
+        await conn.rollback();
+        conn.release();
+        console.error('uzmanSeansOnay error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};

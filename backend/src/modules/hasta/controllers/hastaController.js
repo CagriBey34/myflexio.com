@@ -865,3 +865,212 @@ export const hastaRandevuKarar = async (req, res) => {
         connection.release();
     }
 };
+
+/**
+ * Get treatment plans for the logged-in hasta
+ * GET /api/hasta/tedavi-plani
+ */
+export const getHastaTedaviPlani = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const [hastaRows] = await pool.execute(
+            'SELECT id FROM hasta_profiles WHERE user_id = ?',
+            [userId]
+        );
+        if (hastaRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Hasta profili bulunamadı' });
+        }
+        const hastaProfileId = hastaRows[0].id;
+
+        const [planlar] = await pool.execute(
+            `SELECT tp.*,
+                    up.ad AS uzman_ad, up.soyad AS uzman_soyad, up.unvan AS uzman_unvan,
+                    up.telefon AS uzman_telefon,
+                    sa.sistem_iban, sa.iban_ad_soyad, sa.iban_banka_adi
+             FROM tedavi_planlari tp
+             JOIN uzman_profiles up ON tp.uzman_profile_id = up.id
+             LEFT JOIN sistem_ayarlari sa ON sa.id = 1
+             WHERE tp.hasta_profile_id = ?
+             ORDER BY tp.created_at DESC`,
+            [hastaProfileId]
+        );
+
+        res.status(200).json({ success: true, data: planlar });
+    } catch (error) {
+        console.error('getHastaTedaviPlani error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+/**
+ * Hasta seans aldığını onaylar (geri alınamaz)
+ * PATCH /api/hasta/randevu/:id/seans-al
+ */
+export const hastaSeansAl = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { id } = req.params;
+
+        const [profiles] = await pool.execute(
+            'SELECT id FROM hasta_profiles WHERE user_id = ?', [userId]
+        );
+        if (profiles.length === 0) {
+            return res.status(404).json({ success: false, message: 'Hasta profili bulunamadı' });
+        }
+        const hasta_profile_id = profiles[0].id;
+
+        const [[randevu]] = await pool.execute(
+            'SELECT id, hasta_seans_onayladi FROM randevular WHERE id = ? AND hasta_profile_id = ?',
+            [id, hasta_profile_id]
+        );
+
+        if (!randevu) {
+            return res.status(404).json({ success: false, message: 'Randevu bulunamadı' });
+        }
+        if (randevu.hasta_seans_onayladi) {
+            return res.status(400).json({ success: false, message: 'Seans zaten onaylanmış' });
+        }
+
+        await pool.execute(
+            'UPDATE randevular SET hasta_seans_onayladi = 1, hasta_seans_onaylama_tarihi = NOW() WHERE id = ?',
+            [id]
+        );
+
+        res.status(200).json({ success: true, message: 'Seans onaylandı' });
+    } catch (error) {
+        console.error('hastaSeansAl error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+/**
+ * Upload payment receipt (dekont) for a treatment plan
+ * POST /api/hasta/tedavi-plani/:id/dekont
+ */
+export const uploadDekont = async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+        const userId = req.user.id;
+        const { id } = req.params;
+
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'Dekont dosyası yüklenmelidir' });
+        }
+
+        await connection.beginTransaction();
+
+        const [hastaRows] = await connection.execute(
+            'SELECT id FROM hasta_profiles WHERE user_id = ?', [userId]
+        );
+        if (hastaRows.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ success: false, message: 'Hasta profili bulunamadı' });
+        }
+        const hastaProfileId = hastaRows[0].id;
+
+        const [planRows] = await connection.execute(
+            'SELECT id FROM tedavi_planlari WHERE id = ? AND hasta_profile_id = ? AND durum = ?',
+            [id, hastaProfileId, 'beklemede_odeme']
+        );
+        if (planRows.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ success: false, message: 'Tedavi planı bulunamadı veya zaten işlendi' });
+        }
+
+        const dekontUrl = `/uploads/dekontlar/${req.file.filename}`;
+
+        await connection.execute(
+            "UPDATE tedavi_planlari SET dekont_url = ?, durum = 'dekont_yuklendi' WHERE id = ?",
+            [dekontUrl, id]
+        );
+
+        await connection.commit();
+        res.status(200).json({ success: true, message: 'Dekont başarıyla yüklendi' });
+    } catch (error) {
+        await connection.rollback();
+        console.error('uploadDekont error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    } finally {
+        connection.release();
+    }
+};
+
+/**
+ * Hastanın aktif tedavi planına ait tüm seansları döndür
+ * GET /api/hasta/seanslar
+ */
+export const getHastaSeanslari = async (req, res) => {
+    try {
+        const [profiles] = await pool.execute(
+            'SELECT id FROM hasta_profiles WHERE user_id = ?', [req.user.id]
+        );
+        if (profiles.length === 0) return res.status(404).json({ success: false, message: 'Profil bulunamadı' });
+        const hastaProfileId = profiles[0].id;
+
+        const [seanslar] = await pool.execute(
+            `SELECT s.*,
+                    tp.tedavi_turu, tp.seans_sayisi, tp.toplam_ucret,
+                    up.ad AS uzman_ad, up.soyad AS uzman_soyad, up.unvan AS uzman_unvan
+             FROM seanslar s
+             INNER JOIN tedavi_planlari tp ON s.tedavi_plani_id = tp.id
+             INNER JOIN uzman_profiles up ON tp.uzman_profile_id = up.id
+             WHERE tp.hasta_profile_id = ? AND tp.durum = 'aktif'
+             ORDER BY s.seans_no ASC`,
+            [hastaProfileId]
+        );
+        res.status(200).json({ success: true, data: seanslar });
+    } catch (error) {
+        console.error('getHastaSeanslari error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+/**
+ * Hasta seansı onaylar — her iki taraf onaylarsa seans tamamlanır, sıradaki aktifleşir
+ * PATCH /api/hasta/seanslar/:seansId/seans-al
+ */
+export const hastaSeansOnay = async (req, res) => {
+    const conn = await pool.getConnection();
+    try {
+        const [profiles] = await conn.execute(
+            'SELECT id FROM hasta_profiles WHERE user_id = ?', [req.user.id]
+        );
+        if (profiles.length === 0) { conn.release(); return res.status(404).json({ success: false, message: 'Profil bulunamadı' }); }
+        const hastaProfileId = profiles[0].id;
+
+        const { seansId } = req.params;
+        const [[seans]] = await conn.execute(
+            `SELECT s.* FROM seanslar s
+             INNER JOIN tedavi_planlari tp ON s.tedavi_plani_id = tp.id
+             WHERE s.id = ? AND tp.hasta_profile_id = ?`,
+            [seansId, hastaProfileId]
+        );
+        if (!seans) { conn.release(); return res.status(404).json({ success: false, message: 'Seans bulunamadı' }); }
+        if (seans.durum !== 'aktif') { conn.release(); return res.status(400).json({ success: false, message: 'Seans aktif değil' }); }
+        if (seans.hasta_seans_onayladi) { conn.release(); return res.status(400).json({ success: false, message: 'Zaten onaylandı' }); }
+
+        await conn.beginTransaction();
+        await conn.execute(
+            'UPDATE seanslar SET hasta_seans_onayladi = 1, hasta_seans_onaylama_tarihi = NOW() WHERE id = ?',
+            [seansId]
+        );
+
+        if (seans.uzman_seans_onayladi) {
+            await conn.execute(`UPDATE seanslar SET durum = 'tamamlandi' WHERE id = ?`, [seansId]);
+            await conn.execute(
+                `UPDATE seanslar SET durum = 'aktif'
+                 WHERE tedavi_plani_id = ? AND seans_no = ? AND durum = 'bekliyor'`,
+                [seans.tedavi_plani_id, seans.seans_no + 1]
+            );
+        }
+        await conn.commit();
+        conn.release();
+        res.status(200).json({ success: true, message: 'Seans onaylandı' });
+    } catch (error) {
+        await conn.rollback();
+        conn.release();
+        console.error('hastaSeansOnay error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};

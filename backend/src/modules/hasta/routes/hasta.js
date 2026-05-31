@@ -14,9 +14,14 @@ import {
     getAssessments,
     getAssessment,
     getAssessmentRecommendations,
-    createRandevu,          
-    getHastaRandevular,     
-    hastaRandevuKarar       
+    createRandevu,
+    getHastaRandevular,
+    hastaRandevuKarar,
+    hastaSeansAl,
+    getHastaTedaviPlani,
+    uploadDekont,
+    getHastaSeanslari,
+    hastaSeansOnay
 } from '../controllers/hastaController.js';
 import {
     searchUzmanlar,
@@ -144,5 +149,14 @@ router.delete('/reviews/:id', authenticate, deleteReview);
 router.post('/randevu', authenticate, createRandevu);
 router.get('/randevular', authenticate, getHastaRandevular);
 router.patch('/randevu/:id/karar', authenticate, hastaRandevuKarar);
+router.patch('/randevu/:id/seans-al', authenticate, hastaSeansAl);
+
+// Tedavi planı routes
+router.get('/tedavi-plani', authenticate, getHastaTedaviPlani);
+router.post('/tedavi-plani/:id/dekont', authenticate, uploadSingle('dekont'), handleUploadError, uploadDekont);
+
+// Seans routes
+router.get('/seanslar', authenticate, getHastaSeanslari);
+router.patch('/seanslar/:seansId/seans-al', authenticate, hastaSeansOnay);
 
 export default router;

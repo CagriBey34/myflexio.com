@@ -865,13 +865,148 @@ export const getUzmanlar = async (req, res) => {
     }
 };
 
+export const getTedaviPlanlariAdmin = async (req, res) => {
+    try {
+        const [planlar] = await pool.execute(
+            `SELECT tp.id, tp.tedavi_turu, tp.seans_sayisi, tp.seans_ucreti, tp.toplam_ucret,
+                    tp.notlar, tp.durum, tp.dekont_url, tp.created_at,
+                    hp.ad AS hasta_ad, hp.soyad AS hasta_soyad,
+                    up.ad AS uzman_ad, up.soyad AS uzman_soyad, up.unvan AS uzman_unvan
+             FROM tedavi_planlari tp
+             INNER JOIN hasta_profiles hp ON tp.hasta_profile_id = hp.id
+             INNER JOIN uzman_profiles up ON tp.uzman_profile_id = up.id
+             ORDER BY tp.created_at DESC`
+        );
+        res.status(200).json({ success: true, data: planlar });
+    } catch (error) {
+        console.error('getTedaviPlanlariAdmin error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+export const aktiveTedaviPlaniAdmin = async (req, res) => {
+    const conn = await pool.getConnection();
+    try {
+        const { id } = req.params;
+        await conn.beginTransaction();
+
+        const [result] = await conn.execute(
+            `UPDATE tedavi_planlari SET durum = 'aktif' WHERE id = ? AND durum = 'dekont_yuklendi'`,
+            [id]
+        );
+        if (result.affectedRows === 0) {
+            await conn.rollback();
+            conn.release();
+            return res.status(404).json({ success: false, message: 'Plan bulunamadı veya güncellenemez' });
+        }
+
+        const [[plan]] = await conn.execute(
+            'SELECT seans_sayisi FROM tedavi_planlari WHERE id = ?', [id]
+        );
+        for (let i = 1; i <= plan.seans_sayisi; i++) {
+            await conn.execute(
+                `INSERT INTO seanslar (tedavi_plani_id, seans_no, durum)
+                 VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE durum = VALUES(durum)`,
+                [id, i, i === 1 ? 'aktif' : 'bekliyor']
+            );
+        }
+
+        await conn.commit();
+        conn.release();
+        res.status(200).json({ success: true, message: 'Tedavi planı aktifleştirildi' });
+    } catch (error) {
+        await conn.rollback();
+        conn.release();
+        console.error('aktiveTedaviPlaniAdmin error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+// ─── AKTİF EŞLEŞMELer ─────────────────────────────────────────────────────
+
+export const getAktifEslesmeler = async (req, res) => {
+    try {
+        const [planlar] = await pool.execute(
+            `SELECT tp.id, tp.tedavi_turu, tp.seans_sayisi, tp.toplam_ucret, tp.created_at,
+                    hp.ad AS hasta_ad, hp.soyad AS hasta_soyad, hp.telefon AS hasta_telefon,
+                    hu.email AS hasta_email,
+                    up.ad AS uzman_ad, up.soyad AS uzman_soyad, up.unvan AS uzman_unvan,
+                    (SELECT COUNT(*) FROM seanslar s WHERE s.tedavi_plani_id = tp.id) AS toplam_seans,
+                    (SELECT COUNT(*) FROM seanslar s WHERE s.tedavi_plani_id = tp.id AND s.durum = 'tamamlandi') AS tamamlanan_seans
+             FROM tedavi_planlari tp
+             INNER JOIN hasta_profiles hp ON tp.hasta_profile_id = hp.id
+             INNER JOIN users hu ON hp.user_id = hu.id
+             INNER JOIN uzman_profiles up ON tp.uzman_profile_id = up.id
+             WHERE tp.durum = 'aktif'
+             ORDER BY tp.created_at DESC`
+        );
+        res.status(200).json({ success: true, data: planlar });
+    } catch (error) {
+        console.error('getAktifEslesmeler error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+export const getAdminEslesmeSeanslari = async (req, res) => {
+    try {
+        const { planId } = req.params;
+        const [seanslar] = await pool.execute(
+            `SELECT s.* FROM seanslar s
+             INNER JOIN tedavi_planlari tp ON s.tedavi_plani_id = tp.id
+             WHERE s.tedavi_plani_id = ? AND tp.durum = 'aktif'
+             ORDER BY s.seans_no ASC`,
+            [planId]
+        );
+        res.status(200).json({ success: true, data: seanslar });
+    } catch (error) {
+        console.error('getAdminEslesmeSeanslari error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+// ─── SİSTEM IBAN ─────────────────────────────────────────────────────
+
+export const getSistemIban = async (req, res) => {
+    try {
+        const [[row]] = await pool.execute('SELECT * FROM sistem_ayarlari WHERE id = 1');
+        res.status(200).json({ success: true, data: row || {} });
+    } catch (error) {
+        console.error('getSistemIban error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
+export const setSistemIban = async (req, res) => {
+    try {
+        const { sistem_iban, iban_ad_soyad, iban_banka_adi } = req.body;
+        if (!sistem_iban || sistem_iban.trim().length < 10) {
+            return res.status(400).json({ success: false, message: 'Geçerli bir IBAN giriniz' });
+        }
+        await pool.execute(
+            `INSERT INTO sistem_ayarlari (id, sistem_iban, iban_ad_soyad, iban_banka_adi, updated_at)
+             VALUES (1, ?, ?, ?, NOW())
+             ON DUPLICATE KEY UPDATE
+             sistem_iban = VALUES(sistem_iban),
+             iban_ad_soyad = VALUES(iban_ad_soyad),
+             iban_banka_adi = VALUES(iban_banka_adi),
+             updated_at = NOW()`,
+            [sistem_iban.trim().toUpperCase(), iban_ad_soyad || null, iban_banka_adi || null]
+        );
+        res.status(200).json({ success: true, message: 'Sistem IBAN güncellendi' });
+    } catch (error) {
+        console.error('setSistemIban error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};
+
 export const getUzmanDetail = async (req, res) => {
     try {
         const { id } = req.params;
 
         // Temel profil
         const [rows] = await pool.query(
-            `SELECT 
+            `SELECT
                 u.id as user_id, u.email, u.status, u.created_at,
                 up.id as profile_id,
                 up.ad, up.soyad, up.unvan, up.telefon,
@@ -886,6 +1021,7 @@ export const getUzmanDetail = async (req, res) => {
                 up.ortalama_rating, up.toplam_yorum_sayisi,
                 up.toplam_randevu_sayisi,
                 up.diploma_url, up.kvkk_onay, up.sozlesme_onay,
+                up.iban_no, up.iban_ad_soyad,
                 up.profile_completed_at
              FROM users u
              INNER JOIN uzman_profiles up ON u.id = up.user_id

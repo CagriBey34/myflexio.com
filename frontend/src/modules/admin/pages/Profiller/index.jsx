@@ -2,14 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users, Stethoscope, Search, ChevronRight,
-    Star, MapPin, Phone, Mail,
-    FileText, Calendar, Activity, ArrowRight  // ← ArrowRight ekle
+    Star, MapPin, FileText, Calendar, Activity, ArrowRight
 } from 'lucide-react';
 
 import {
     getHastalar, getHastaDetail,
     getAdminUzmanlar, getUzmanDetail
 } from '../../services/adminService';
+
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/api$/, '');
 
 const TABS = [
     { key: 'hastalar', label: 'Hastalar', icon: Users },
@@ -259,6 +260,29 @@ function DetailPanel({ type, id, onClose }) {
                             </div>
                         )}
 
+                        {/* Uzman — IBAN */}
+                        {type === 'uzman' && (
+                            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-2">
+                                <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">
+                                    Uzman IBAN (Gizli — Sadece Admin Görebilir)
+                                </p>
+                                {data.iban_no ? (
+                                    <>
+                                        <p className="text-sm font-black text-gray-900 tracking-widest">
+                                            {data.iban_no}
+                                        </p>
+                                        {data.iban_ad_soyad && (
+                                            <p className="text-xs font-bold text-gray-600">
+                                                Hesap Adı: {data.iban_ad_soyad}
+                                            </p>
+                                        )}
+                                    </>
+                                ) : (
+                                    <p className="text-xs text-gray-400 italic">IBAN henüz girilmemiş</p>
+                                )}
+                            </div>
+                        )}
+
                         {/* Uzman — ücretler */}
                         {type === 'uzman' && (data.seans_ucreti_min || data.online_seans_ucreti) && (
                             <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
@@ -460,7 +484,7 @@ function DetailPanel({ type, id, onClose }) {
                             </p>
                         ) : data.raporlar?.map(r => (
                             <a key={r.id}
-                                href={`http://localhost:3000${r.dosya_url}`}
+                                href={`${API_BASE}${r.dosya_url}`}
                                 target="_blank"
                                 className="flex items-center gap-3 bg-gray-50
                                     rounded-2xl p-4 hover:bg-blue-50
@@ -584,7 +608,7 @@ function DetailPanel({ type, id, onClose }) {
                             <div>
                                 <p className="text-[10px] font-black text-gray-400
                                     uppercase tracking-widest mb-2">Diploma</p>
-                                <a href={`http://localhost:3000${data.diploma_url}`}
+                                <a href={`${API_BASE}${data.diploma_url}`}
                                     target="_blank"
                                     className="flex items-center gap-3 bg-gray-50
                                         rounded-2xl p-4 hover:bg-blue-50
@@ -609,7 +633,7 @@ function DetailPanel({ type, id, onClose }) {
                                 <div className="space-y-2">
                                     {data.sertifikalar.map(s => (
                                         <a key={s.id}
-                                            href={`http://localhost:3000${s.dosya_url}`}
+                                            href={`${API_BASE}${s.dosya_url}`}
                                             target="_blank"
                                             className="flex items-center gap-3
                                                 bg-gray-50 rounded-2xl p-4

@@ -17,6 +17,8 @@ const storage = multer.diskStorage({
             uploadPath += 'medical-reports/';
         } else if (file.fieldname === 'kapakGorseli') {
             uploadPath += 'article-covers/';
+        } else if (file.fieldname === 'dekont') {
+            uploadPath += 'dekontlar/';
         }
 
         // Klasör yoksa oluştur

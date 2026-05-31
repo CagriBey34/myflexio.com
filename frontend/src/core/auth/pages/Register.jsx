@@ -1,14 +1,12 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { 
-  UserCircle, 
-  Stethoscope, 
-  CheckCircle2, 
-  ArrowRight, 
+import {
+  UserCircle,
+  Stethoscope,
+  CheckCircle2,
+  ArrowRight,
   HeartPulse,
   ShieldCheck,
-  Zap
 } from 'lucide-react';
 
 /* ─── Animasyon Varyantları (Ana sayfadakiyle aynı) ─── */
@@ -31,9 +29,20 @@ const containerStagger = {
 
 export default function Register() {
   return (
-    <div className="min-h-[calc(100dvh-80px)] w-full bg-white flex items-center justify-center p-4 md:p-8 font-sans overflow-hidden">
-      
-      {/* Arka Plan Dekoratif Blurlar (Ana sayfadaki gibi) */}
+    <div className="min-h-screen w-full bg-white flex items-center justify-center p-4 md:p-8 font-sans overflow-hidden relative">
+
+      {/* --- LOGO --- */}
+      <Link
+        to="/"
+        className="absolute top-6 left-6 flex items-center gap-2 text-[#0a2e1a] hover:text-[#16a34a] transition-colors z-10"
+      >
+        <div className="w-8 h-8 rounded-xl bg-[#dcfce7] flex items-center justify-center">
+          <HeartPulse size={18} className="text-[#16a34a]" />
+        </div>
+        <span className="font-black text-lg tracking-tight">MyFlexio</span>
+      </Link>
+
+      {/* Arka Plan Dekoratif Blurlar */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[#4ade80] blur-[120px] opacity-5" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] rounded-full bg-[#0f4c35] blur-[100px] opacity-5" />

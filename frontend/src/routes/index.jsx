@@ -244,7 +244,10 @@ const router = createBrowserRouter([
     {
         path: '*',
         element: <NotFound />,
+        
     },
 ]);
+
+/* docker compose up -d  */
 
 export default router;

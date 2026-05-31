@@ -139,7 +139,7 @@ export default function UzmanDashboard() {
             {profile?.unvan} | MyFlexio Uzman Paneli
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        {/* <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
                 <p className="text-[10px] font-black text-slate-400 uppercase">Son Giriş</p>
                 <p className="text-xs font-bold text-slate-700">Bugün, 09:42</p>
@@ -147,7 +147,7 @@ export default function UzmanDashboard() {
             <div className="w-12 h-12 bg-slate-200 rounded-2xl border-2 border-white shadow-sm overflow-hidden">
                 <img src={`https://ui-avatars.com/api/?name=${profile?.ad}+${profile?.soyad}&background=random`} alt="profil" />
             </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Status Alert Bölümü */}

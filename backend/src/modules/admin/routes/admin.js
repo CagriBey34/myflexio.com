@@ -9,16 +9,22 @@ import {
     deleteUser,
     getRandevular,
     updateRandevuDurum,
-    getYorumlar,       
-    deleteYorum,       
-    getSorular,        
-    createSoru,        
-    updateSoru,        
-    deleteSoru,        
-    getHastalar,       
-    getHastaDetail,    
-    getUzmanlar,       
-    getUzmanDetail    
+    getYorumlar,
+    deleteYorum,
+    getSorular,
+    createSoru,
+    updateSoru,
+    deleteSoru,
+    getHastalar,
+    getHastaDetail,
+    getUzmanlar,
+    getUzmanDetail,
+    getTedaviPlanlariAdmin,
+    aktiveTedaviPlaniAdmin,
+    getSistemIban,
+    setSistemIban,
+    getAktifEslesmeler,
+    getAdminEslesmeSeanslari
 } from '../controllers/adminController.js';
 import { authenticate } from '../../../core/auth/middleware/auth.js';
 import { requireAdmin } from '../middleware/adminAuth.js';
@@ -46,5 +52,11 @@ router.get('/hastalar', getHastalar);
 router.get('/hastalar/:id', getHastaDetail);
 router.get('/uzmanlar-list', getUzmanlar);
 router.get('/uzmanlar-list/:id', getUzmanDetail);
+router.get('/tedavi-planlari', getTedaviPlanlariAdmin);
+router.patch('/tedavi-plani/:id/aktifet', aktiveTedaviPlaniAdmin);
+router.get('/sistem-iban', getSistemIban);
+router.put('/sistem-iban', setSistemIban);
+router.get('/aktif-eslesmeler', getAktifEslesmeler);
+router.get('/eslesmeler/:planId/seanslar', getAdminEslesmeSeanslari);
 
 export default router;

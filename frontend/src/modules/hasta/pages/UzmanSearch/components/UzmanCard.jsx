@@ -71,13 +71,13 @@ export default function UzmanCard({ uzman, isRecommended }) {
         >
             Profili Gör
         </Button>
-        <Button
+      {/*   <Button
             variant="outline"
             onClick={() => navigate(`/hasta/uzman/${uzman.id}`, { state: { openRandevu: true } })}
             className="border-2 border-slate-100 text-slate-600 rounded-2xl font-black py-4 text-xs uppercase tracking-widest hover:bg-blue-50 transition-all"
         >
             Randevu Al
-        </Button>
+        </Button> */}
       </div>
     </motion.div>
   );

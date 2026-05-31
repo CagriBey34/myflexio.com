@@ -54,6 +54,21 @@ export default function Button({
             'focus:ring-red-500',
             'disabled:bg-red-300 disabled:shadow-none',
         ].join(' '),
+
+        green: [
+            'bg-green-600 text-white',
+            'hover:bg-green-700',
+            'shadow-sm hover:shadow-md hover:shadow-green-200',
+            'focus:ring-green-500',
+            'disabled:bg-green-300 disabled:shadow-none',
+        ].join(' '),
+
+        'green-outline': [
+            'border-2 border-green-600 text-green-600 bg-transparent',
+            'hover:bg-green-50',
+            'focus:ring-green-500',
+            'disabled:border-green-200 disabled:text-green-200',
+        ].join(' '),
     };
 
     const sizes = {

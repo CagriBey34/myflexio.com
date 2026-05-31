@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, GraduationCap, Award, FileText, ChevronRight, ChevronLeft, Upload, X, Save, ArrowLeft } from 'lucide-react';
+import { User, GraduationCap, Award, FileText, ChevronRight, ChevronLeft, Upload, X, Save, ArrowLeft, HeartPulse, BadgeDollarSign } from 'lucide-react';
 import { getProfile, completeProfile } from '../../services/uzmanService';
-import Button from '../../../../shared/components/ui/Button';
 import Input from '../../../../shared/components/ui/Input';
 
 const EXPERTISE_OPTIONS = {
@@ -18,6 +17,12 @@ const DEFAULT_UZMANLIK = {
     tedaviYontemleri: [],
     ozelAlanlar: [],
     hastaliklar: []
+};
+
+/* ─── Animasyon Varyantları ─────────────────────────────────── */
+const fadeUp = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
 };
 
 export default function EditProfile() {
@@ -39,10 +44,14 @@ export default function EditProfile() {
         mezuniyetYili: '',
         biyografi: '',
         uzmanlikAlanlari: { ...DEFAULT_UZMANLIK },
-        sertifikalar: []
+        sertifikalar: [],
+        onlineSeansucreti: '',
+        evdeSeansucreti: '',
+        ibanNo: '',
+        ibanAdSoyad: '',
     });
 
-    const totalSteps = 4;
+    const totalSteps = 5;
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -50,13 +59,11 @@ export default function EditProfile() {
                 const response = await getProfile();
                 const p = response.data;
 
-                // Backend'den gelen uzmanlikAlanlari verisini default ile birleştir
                 const uzmanlikAlanlari = {
                     ...DEFAULT_UZMANLIK,
                     ...(p.uzmanlikAlanlari || {})
                 };
 
-                // Her kategorinin array olduğundan emin ol
                 Object.keys(uzmanlikAlanlari).forEach(key => {
                     if (!Array.isArray(uzmanlikAlanlari[key])) {
                         uzmanlikAlanlari[key] = [];
@@ -78,7 +85,11 @@ export default function EditProfile() {
                         adi: cert.adi,
                         dosya: null,
                         dosya_url: cert.dosya_url
-                    }))
+                    })),
+                    onlineSeansucreti: p.online_seans_ucreti || '',
+                    evdeSeansucreti: p.evde_seans_ucreti || '',
+                    ibanNo: p.iban_no || '',
+                    ibanAdSoyad: p.iban_ad_soyad || '',
                 });
 
                 if (p.profil_fotograf_url) {
@@ -95,7 +106,7 @@ export default function EditProfile() {
     }, []);
 
     const toggleExpertise = (category, value) => {
-        const current = formData.uzmanlikAlanlari[category] || []; // güvenli erişim
+        const current = formData.uzmanlikAlanlari[category] || [];
         const updated = current.includes(value)
             ? current.filter(v => v !== value)
             : [...current, value];
@@ -176,6 +187,7 @@ export default function EditProfile() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (currentStep !== totalSteps) return;
         setError('');
         setLoading(true);
 
@@ -192,6 +204,10 @@ export default function EditProfile() {
             submitData.append('mezuniyetYili', formData.mezuniyetYili);
             submitData.append('biyografi', formData.biyografi);
             submitData.append('uzmanlikAlanlari', JSON.stringify(formData.uzmanlikAlanlari));
+            if (formData.onlineSeansucreti) submitData.append('onlineSeansucreti', formData.onlineSeansucreti);
+            if (formData.evdeSeansucreti) submitData.append('evdeSeansucreti', formData.evdeSeansucreti);
+            if (formData.ibanNo) submitData.append('ibanNo', formData.ibanNo);
+            if (formData.ibanAdSoyad) submitData.append('ibanAdSoyad', formData.ibanAdSoyad);
 
             if (formData.sertifikalar.length > 0) {
                 const certData = formData.sertifikalar.map(cert => ({
@@ -217,8 +233,8 @@ export default function EditProfile() {
     if (fetchLoading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Profil Yükleniyor...</p>
+                <div className="w-12 h-12 border-4 border-[#4ade80] border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-[#0a2e1a] font-bold text-xs uppercase tracking-widest">Profil Yükleniyor...</p>
             </div>
         );
     }
@@ -227,28 +243,31 @@ export default function EditProfile() {
         switch (currentStep) {
             case 1:
                 return (
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                        <div className="text-center mb-6">
-                            <User className="mx-auto text-blue-600 mb-2" size={40} />
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tighter">Kişisel Bilgiler</h3>
-                            <p className="text-slate-500 font-medium mt-1">Temel bilgilerinizi güncelleyin</p>
+                    <motion.div initial="hidden" animate="visible" variants={fadeUp} className="space-y-6">
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 rounded-2xl bg-[#dcfce7] flex items-center justify-center mx-auto mb-4">
+                                <User className="text-[#16a34a]" size={32} />
+                            </div>
+                            <h3 className="text-2xl font-black text-[#0a2e1a]">Kişisel Bilgiler</h3>
+                            <p className="text-gray-500 text-sm mt-2">Temel bilgilerinizi güncelleyin</p>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid md:grid-cols-2 gap-5">
                             <Input
                                 label="Doğum Tarihi"
                                 type="date"
                                 required
                                 value={formData.dogumTarihi}
                                 onChange={(e) => setFormData({ ...formData, dogumTarihi: e.target.value })}
+                                className="border-gray-200 focus:ring-2 focus:ring-[#4ade80] rounded-xl"
                             />
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Cinsiyet *</label>
+                                <label className="block text-sm font-bold text-[#0a2e1a] mb-2">Cinsiyet <span className="text-red-500">*</span></label>
                                 <select
                                     required
                                     value={formData.cinsiyet}
                                     onChange={(e) => setFormData({ ...formData, cinsiyet: e.target.value })}
-                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white"
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ade80] focus:border-transparent bg-white transition-all text-sm"
                                 >
                                     <option value="">Seçiniz</option>
                                     <option value="erkek">Erkek</option>
@@ -258,13 +277,14 @@ export default function EditProfile() {
                             </div>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid md:grid-cols-2 gap-5">
                             <Input
                                 label="Şehir"
                                 required
                                 value={formData.sehir}
                                 onChange={(e) => setFormData({ ...formData, sehir: e.target.value })}
                                 placeholder="İstanbul"
+                                className="border-gray-200 focus:ring-2 focus:ring-[#4ade80] rounded-xl"
                             />
                             <Input
                                 label="İlçe"
@@ -272,22 +292,27 @@ export default function EditProfile() {
                                 value={formData.ilce}
                                 onChange={(e) => setFormData({ ...formData, ilce: e.target.value })}
                                 placeholder="Kadıköy"
+                                className="border-gray-200 focus:ring-2 focus:ring-[#4ade80] rounded-xl"
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Profil Fotoğrafı</label>
-                            <div className="flex items-center gap-4">
-                                {photoPreview && (
-                                    <img src={photoPreview} alt="Preview" className="w-20 h-20 rounded-2xl object-cover ring-4 ring-blue-50" />
+                        <div className="pt-2">
+                            <label className="block text-sm font-bold text-[#0a2e1a] mb-3">Profil Fotoğrafı</label>
+                            <div className="flex items-center gap-5 p-4 border border-gray-100 bg-gray-50 rounded-2xl">
+                                {photoPreview ? (
+                                    <img src={photoPreview} alt="Preview" className="w-20 h-20 rounded-2xl object-cover ring-4 ring-[#dcfce7]" />
+                                ) : (
+                                    <div className="w-20 h-20 rounded-2xl bg-gray-200 flex items-center justify-center">
+                                        <User className="text-gray-400" size={32} />
+                                    </div>
                                 )}
                                 <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" id="photo-upload" />
                                 <label
                                     htmlFor="photo-upload"
-                                    className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 text-sm font-medium text-slate-700"
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-[#4ade80] hover:text-[#16a34a] transition-all text-sm font-bold text-gray-600 shadow-sm"
                                 >
                                     <Upload size={18} />
-                                    {formData.profilFotograf ? 'Fotoğrafı Değiştir' : 'Fotoğraf Güncelle'}
+                                    {formData.profilFotograf ? 'Fotoğrafı Değiştir' : 'Fotoğraf Yükle'}
                                 </label>
                             </div>
                         </div>
@@ -296,11 +321,13 @@ export default function EditProfile() {
 
             case 2:
                 return (
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                        <div className="text-center mb-6">
-                            <GraduationCap className="mx-auto text-blue-600 mb-2" size={40} />
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tighter">Eğitim Bilgileri</h3>
-                            <p className="text-slate-500 font-medium mt-1">Akademik geçmişinizi güncelleyin</p>
+                    <motion.div initial="hidden" animate="visible" variants={fadeUp} className="space-y-6">
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 rounded-2xl bg-[#dbeafe] flex items-center justify-center mx-auto mb-4">
+                                <GraduationCap className="text-[#1d4ed8]" size={32} />
+                            </div>
+                            <h3 className="text-2xl font-black text-[#0a2e1a]">Eğitim Bilgileri</h3>
+                            <p className="text-gray-500 text-sm mt-2">Akademik geçmişinizi güncelleyin</p>
                         </div>
 
                         <Input
@@ -308,7 +335,8 @@ export default function EditProfile() {
                             required
                             value={formData.mezuniyetOkul}
                             onChange={(e) => setFormData({ ...formData, mezuniyetOkul: e.target.value })}
-                            placeholder="Hacettepe Üniversitesi"
+                            placeholder="Örn: Hacettepe Üniversitesi"
+                            className="border-gray-200 focus:ring-2 focus:ring-[#4ade80] rounded-xl"
                         />
                         <Input
                             label="Mezuniyet Yılı"
@@ -316,11 +344,12 @@ export default function EditProfile() {
                             required
                             value={formData.mezuniyetYili}
                             onChange={(e) => setFormData({ ...formData, mezuniyetYili: e.target.value })}
-                            placeholder="2015"
+                            placeholder="Örn: 2015"
+                            className="border-gray-200 focus:ring-2 focus:ring-[#4ade80] rounded-xl"
                         />
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Biyografi * <span className="text-slate-400">(Max 500 karakter)</span>
+                            <label className="block text-sm font-bold text-[#0a2e1a] mb-2">
+                                Biyografi <span className="text-red-500">*</span> <span className="text-gray-400 font-normal ml-1">(Maks 500 karakter)</span>
                             </label>
                             <textarea
                                 required
@@ -328,41 +357,44 @@ export default function EditProfile() {
                                 onChange={(e) => setFormData({ ...formData, biyografi: e.target.value })}
                                 maxLength={500}
                                 rows={6}
-                                className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 resize-none"
-                                placeholder="Kendinizden bahsedin, deneyimlerinizi paylaşın..."
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ade80] focus:border-transparent resize-none transition-all text-sm"
+                                placeholder="Danışanlarınıza kendinizden bahsedin, deneyimlerinizi paylaşın..."
                             />
-                            <p className="text-sm text-slate-400 mt-1 text-right">{formData.biyografi.length}/500</p>
+                            <p className="text-xs text-gray-400 mt-2 text-right font-medium">{formData.biyografi.length} / 500</p>
                         </div>
                     </motion.div>
                 );
 
             case 3:
                 return (
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                        <div className="text-center mb-6">
-                            <Award className="mx-auto text-blue-600 mb-2" size={40} />
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tighter">Uzmanlık Alanları</h3>
-                            <p className="text-slate-500 font-medium mt-1">Uzmanlıklarınızı güncelleyin</p>
+                    <motion.div initial="hidden" animate="visible" variants={fadeUp} className="space-y-6">
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 rounded-2xl bg-[#fef3c7] flex items-center justify-center mx-auto mb-4">
+                                <Award className="text-[#d97706]" size={32} />
+                            </div>
+                            <h3 className="text-2xl font-black text-[#0a2e1a]">Uzmanlık Alanları</h3>
+                            <p className="text-gray-500 text-sm mt-2">Hizmet verdiğiniz alanları işaretleyin</p>
                         </div>
 
                         {Object.entries(EXPERTISE_OPTIONS).map(([category, options]) => (
-                            <div key={category} className="bg-slate-50 p-5 rounded-2xl">
-                                <h4 className="font-black text-slate-800 text-sm uppercase tracking-widest mb-4">
+                            <div key={category} className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+                                <h4 className="font-black text-[#0a2e1a] text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <HeartPulse size={14} className="text-[#4ade80]" />
                                     {category === 'vucutBolgesi' && 'Vücut Bölgesi'}
                                     {category === 'tedaviYontemleri' && 'Tedavi Yöntemleri'}
                                     {category === 'ozelAlanlar' && 'Özel Alanlar'}
                                     {category === 'hastaliklar' && 'Hastalıklar'}
                                 </h4>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                <div className="flex flex-wrap gap-2.5">
                                     {options.map(option => (
                                         <button
                                             key={option}
                                             type="button"
                                             onClick={() => toggleExpertise(category, option)}
-                                            className={`px-3 py-2 rounded-xl text-sm font-bold transition-all ${
+                                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 border ${
                                                 isSelected(category, option)
-                                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                                                    : 'bg-white text-slate-700 hover:bg-blue-50 border border-slate-200'
+                                                    ? 'bg-[#0f4c35] text-white border-[#0f4c35] shadow-lg shadow-green-900/20'
+                                                    : 'bg-white text-gray-500 border-gray-200 hover:border-[#4ade80] hover:text-[#16a34a]'
                                             }`}
                                         >
                                             {option}
@@ -376,63 +408,158 @@ export default function EditProfile() {
 
             case 4:
                 return (
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                        <div className="text-center mb-6">
-                            <FileText className="mx-auto text-blue-600 mb-2" size={40} />
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tighter">Sertifikalar</h3>
-                            <p className="text-slate-500 font-medium mt-1">Sertifikalarınızı güncelleyin</p>
+                    <motion.div initial="hidden" animate="visible" variants={fadeUp} className="space-y-6">
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 rounded-2xl bg-[#f3e8ff] flex items-center justify-center mx-auto mb-4">
+                                <FileText className="text-[#7e22ce]" size={32} />
+                            </div>
+                            <h3 className="text-2xl font-black text-[#0a2e1a]">Sertifikalar</h3>
+                            <p className="text-gray-500 text-sm mt-2">Mesleki belgelerinizi sisteme ekleyin</p>
                         </div>
 
                         {formData.sertifikalar.map((cert, index) => (
-                            <div key={index} className="bg-slate-50 p-5 rounded-2xl relative">
+                            <div key={index} className="bg-gray-50 p-6 rounded-3xl relative border border-gray-100 group hover:border-[#4ade80]/40 transition-colors">
                                 <button
                                     type="button"
                                     onClick={() => removeCertificate(index)}
-                                    className="absolute top-3 right-3 text-red-400 hover:text-red-600 transition-colors"
+                                    className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white text-red-400 hover:text-white hover:bg-red-500 shadow-sm transition-all"
                                 >
-                                    <X size={20} />
+                                    <X size={16} />
                                 </button>
-                                <div className="space-y-3">
+                                <div className="space-y-4 pr-10">
                                     <Input
                                         label={`Sertifika ${index + 1} Adı`}
                                         value={cert.adi}
                                         onChange={(e) => updateCertificate(index, 'adi', e.target.value)}
-                                        placeholder="Spor Fizyoterapisi Sertifikası"
+                                        placeholder="Örn: Spor Fizyoterapisi Sertifikası"
+                                        className="border-gray-200 focus:ring-2 focus:ring-[#4ade80] rounded-xl"
                                     />
+                                    
                                     {cert.dosya_url && !cert.dosya && (
-                                        <div className="flex items-center gap-2 text-sm text-slate-500 bg-white px-3 py-2 rounded-lg border border-slate-200">
-                                            <FileText size={14} className="text-blue-500" />
-                                            <span>Mevcut dosya yüklü</span>
-                                            <a href={cert.dosya_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-auto text-xs">Görüntüle</a>
+                                        <div className="flex items-center gap-3 text-sm text-gray-600 bg-white px-4 py-3 rounded-xl border border-gray-200">
+                                            <FileText size={16} className="text-[#16a34a]" />
+                                            <span className="font-medium">Mevcut dosya yüklü</span>
+                                            <a href={cert.dosya_url} target="_blank" rel="noopener noreferrer" className="text-[#16a34a] font-bold hover:underline ml-auto text-xs">Görüntüle</a>
                                         </div>
                                     )}
+                                    
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                                            {cert.dosya_url ? 'Dosyayı Değiştir (Opsiyonel)' : 'Dosya Yükle'}
+                                        <label className="block text-sm font-bold text-[#0a2e1a] mb-2">
+                                            {cert.dosya_url ? 'Dosyayı Değiştir (Opsiyonel)' : 'Belge Yükle'}
                                         </label>
                                         <input
                                             type="file"
                                             accept=".pdf,.jpg,.jpeg,.png"
                                             onChange={(e) => updateCertificate(index, 'dosya', e.target.files[0])}
-                                            className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                            className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#dcfce7] file:text-[#16a34a] hover:file:bg-[#bbf7d0] cursor-pointer transition-all"
                                         />
                                         {cert.dosya && (
-                                            <p className="text-xs text-slate-500 mt-1">{cert.dosya.name}</p>
+                                            <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                                                <HeartPulse size={12} className="text-[#4ade80]" />
+                                                {cert.dosya.name}
+                                            </p>
                                         )}
                                     </div>
                                 </div>
                             </div>
                         ))}
 
-                        <Button
+                        <button
                             type="button"
-                            variant="outline"
                             onClick={addCertificate}
-                            className="w-full"
                             disabled={formData.sertifikalar.length >= 10}
+                            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-dashed border-gray-200 text-[#16a34a] font-bold text-sm hover:border-[#4ade80] hover:bg-[#f0fdf4] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             + Yeni Sertifika Ekle
-                        </Button>
+                        </button>
+                    </motion.div>
+                );
+
+            case 5:
+                return (
+                    <motion.div initial="hidden" animate="visible" variants={fadeUp} className="space-y-6">
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 rounded-2xl bg-[#dcfce7] flex items-center justify-center mx-auto mb-4">
+                                <BadgeDollarSign className="text-[#16a34a]" size={32} />
+                            </div>
+                            <h3 className="text-2xl font-black text-[#0a2e1a]">Hizmet Ücretleri</h3>
+                            <p className="text-gray-500 text-sm mt-2">Seans başına ücretlerinizi belirleyin</p>
+                        </div>
+
+                        <div className="bg-[#f0fdf4] rounded-3xl p-6 border border-[#bbf7d0] space-y-5">
+                            <div>
+                                <label className="block text-sm font-black text-[#0a2e1a] mb-1">
+                                    💻 Online Seans Ücreti (₺)
+                                </label>
+                                <p className="text-xs text-gray-400 mb-3">Hasta ile video/online görüşme başına ücret</p>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-black text-sm">₺</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="50"
+                                        value={formData.onlineSeansucreti}
+                                        onChange={(e) => setFormData({ ...formData, onlineSeansucreti: e.target.value })}
+                                        placeholder="Örn: 500"
+                                        className="w-full pl-9 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ade80] focus:border-[#4ade80] bg-white text-sm font-bold text-[#0a2e1a] transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="border-t border-[#bbf7d0]" />
+
+                            <div>
+                                <label className="block text-sm font-black text-[#0a2e1a] mb-1">
+                                    🏠 Evde Tedavi Seans Ücreti (₺)
+                                </label>
+                                <p className="text-xs text-gray-400 mb-3">Hastanın evinde yapılan seans başına ücret</p>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-black text-sm">₺</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="50"
+                                        value={formData.evdeSeansucreti}
+                                        onChange={(e) => setFormData({ ...formData, evdeSeansucreti: e.target.value })}
+                                        placeholder="Örn: 800"
+                                        className="w-full pl-9 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ade80] focus:border-[#4ade80] bg-white text-sm font-bold text-[#0a2e1a] transition-all"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-t border-[#bbf7d0] pt-5 space-y-3">
+                            <div>
+                                <label className="block text-sm font-black text-[#0a2e1a] mb-1">
+                                    🏦 IBAN Numaranız
+                                </label>
+                                <p className="text-xs text-gray-400 mb-3">Ödeme bilgileriniz hastalar tarafından görülemez, sadece admin tarafından kontrol edilir.</p>
+                                <input
+                                    type="text"
+                                    value={formData.ibanNo}
+                                    onChange={(e) => setFormData({ ...formData, ibanNo: e.target.value.toUpperCase() })}
+                                    placeholder="TR00 0000 0000 0000 0000 0000 00"
+                                    maxLength={32}
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ade80] focus:border-[#4ade80] bg-white text-sm font-bold text-[#0a2e1a] tracking-widest transition-all"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-black text-[#0a2e1a] mb-1">
+                                    Hesap Sahibi Adı Soyadı
+                                </label>
+                                <input
+                                    type="text"
+                                    value={formData.ibanAdSoyad}
+                                    onChange={(e) => setFormData({ ...formData, ibanAdSoyad: e.target.value })}
+                                    placeholder="Örn: Ahmet Yılmaz"
+                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4ade80] focus:border-[#4ade80] bg-white text-sm font-bold text-[#0a2e1a] transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-gray-400 text-center">
+                            Bu ücretler tedavi planı oluştururken otomatik hesaplamalarda kullanılır.
+                        </p>
                     </motion.div>
                 );
 
@@ -442,72 +569,100 @@ export default function EditProfile() {
     };
 
     return (
-        <div className="max-w-3xl mx-auto pb-12">
-            <button
-                onClick={() => navigate('/uzman/profile')}
-                className="flex items-center gap-2 text-slate-500 hover:text-slate-900 font-bold text-sm mb-6 transition-colors"
-            >
-                <ArrowLeft size={18} /> Profile Dön
-            </button>
+        <div className="bg-[#f0fdf4] min-h-screen py-12 px-4 md:px-8">
+            <div className="max-w-3xl mx-auto">
+                <button
+                    onClick={() => navigate('/uzman/profile')}
+                    className="flex items-center gap-2 text-[#16a34a] hover:text-[#0a2e1a] font-bold text-sm mb-6 transition-colors"
+                >
+                    <ArrowLeft size={18} /> Profile Dön
+                </button>
 
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-100 border border-slate-100 p-8 md:p-10"
-            >
-                <div className="mb-8">
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tighter italic">Profili Düzenle</h1>
-                    <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-1">Bilgilerinizi güncelleyin</p>
-                </div>
-
-                <div className="mb-8">
-                    <div className="flex gap-2 mb-2">
-                        {[1, 2, 3, 4].map((step) => (
-                            <div
-                                key={step}
-                                className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${
-                                    step <= currentStep ? 'bg-blue-600' : 'bg-slate-100'
-                                }`}
-                            />
-                        ))}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="bg-white rounded-[2.5rem] shadow-xl shadow-green-900/5 border border-gray-100 p-8 md:p-12"
+                >
+                    <div className="mb-10">
+                        <span className="inline-block text-[#16a34a] text-xs font-bold uppercase tracking-widest bg-[#dcfce7] px-4 py-2 rounded-full mb-4">
+                            Profili Düzenle
+                        </span>
+                        <h1 className="text-3xl md:text-4xl font-black text-[#0a2e1a] leading-tight">
+                            Bilgilerini Güncelle
+                        </h1>
                     </div>
-                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
-                        Adım {currentStep} / {totalSteps}
-                    </p>
-                </div>
 
-                {error && (
-                    <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-2xl mb-6 text-sm font-medium">
-                        {error}
+                    <div className="mb-10">
+                        <div className="flex gap-3 mb-3">
+                            {[1, 2, 3, 4].map((step) => (
+                                <div
+                                    key={step}
+                                    className={`flex-1 h-2 rounded-full transition-all duration-500 ${
+                                        step <= currentStep ? 'bg-[#4ade80]' : 'bg-gray-100'
+                                    }`}
+                                />
+                            ))}
+                        </div>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest text-right">
+                            Adım {currentStep} / {totalSteps}
+                        </p>
                     </div>
-                )}
-                {success && (
-                    <div className="bg-green-50 border border-green-100 text-green-600 px-4 py-3 rounded-2xl mb-6 text-sm font-bold">
-                        {success}
-                    </div>
-                )}
 
-                <form onSubmit={handleSubmit}>
-                    {renderStep()}
+                    {error && (
+                        <div className="bg-red-50 border border-red-100 text-red-600 px-5 py-4 rounded-2xl mb-8 text-sm font-medium flex items-center gap-2">
+                            <X size={18} /> {error}
+                        </div>
+                    )}
+                    {success && (
+                        <div className="bg-[#dcfce7] border border-[#4ade80]/30 text-[#16a34a] px-5 py-4 rounded-2xl mb-8 text-sm font-bold flex items-center gap-2">
+                            <HeartPulse size={18} /> {success}
+                        </div>
+                    )}
 
-                    <div className="flex gap-4 mt-10">
-                        {currentStep > 1 && (
-                            <Button type="button" variant="outline" onClick={handlePrev} className="flex-1" size="lg">
-                                <ChevronLeft size={20} /> Geri
-                            </Button>
-                        )}
-                        {currentStep < totalSteps ? (
-                            <Button type="button" onClick={handleNext} className="flex-1" size="lg">
-                                Devam Et <ChevronRight size={20} />
-                            </Button>
-                        ) : (
-                            <Button type="submit" loading={loading} className="flex-1 bg-blue-600 hover:bg-blue-700" size="lg">
-                                <Save size={18} /> Değişiklikleri Kaydet
-                            </Button>
-                        )}
-                    </div>
-                </form>
-            </motion.div>
+                    <form onSubmit={handleSubmit}>
+                        <div className="min-h-[400px]">
+                            {renderStep()}
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-4 mt-12 pt-8 border-t border-gray-100">
+                            {currentStep > 1 && (
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.preventDefault(); handlePrev(); }}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-white text-[#0a2e1a] border border-gray-200 font-bold px-8 py-4 rounded-full hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 text-sm"
+                                >
+                                    <ChevronLeft size={18} /> Geri
+                                </button>
+                            )}
+                            
+                            {currentStep < totalSteps ? (
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.preventDefault(); handleNext(); }}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-[#0f4c35] text-white font-bold px-8 py-4 rounded-full hover:bg-[#16a34a] transition-all duration-300 shadow-lg shadow-green-900/20 text-sm"
+                                >
+                                    Devam Et <ChevronRight size={18} />
+                                </button>
+                            ) : (
+                                <button 
+                                    type="submit" 
+                                    disabled={loading}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-[#4ade80] text-[#0a2e1a] font-bold px-8 py-4 rounded-full hover:bg-[#22c55e] transition-all duration-300 shadow-lg shadow-green-500/20 text-sm disabled:opacity-70"
+                                >
+                                    {loading ? (
+                                        <div className="w-5 h-5 border-2 border-[#0a2e1a] border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                        <>
+                                            <Save size={18} /> Değişiklikleri Kaydet
+                                        </>
+                                    )}
+                                </button>
+                            )}
+                        </div>
+                    </form>
+                </motion.div>
+            </div>
         </div>
     );
 }

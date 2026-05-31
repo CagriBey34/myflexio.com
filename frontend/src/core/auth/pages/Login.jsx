@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogIn, Mail, Lock, CheckCircle2, XCircle, ArrowRight, ShieldCheck } from 'lucide-react';
+import { LogIn, Mail, Lock, CheckCircle2, XCircle, ArrowRight, ShieldCheck, HeartPulse } from 'lucide-react';
 import { useAuthStore } from '../../../shared/store/authStore';
 import api from '../../../shared/services/api';
 import Button from '../../../shared/components/ui/Button';
@@ -54,7 +54,7 @@ export default function Login() {
   };
 
   return (
-    <div className="w-full min-h-[calc(100dvh-80px)] flex items-center justify-center px-4 py-8 overflow-hidden relative bg-white font-sans">
+    <div className="w-full min-h-screen flex items-center justify-center px-4 py-8 overflow-hidden relative bg-white font-sans">
       
       {/* --- ARKA PLAN DEKORATİF BLURLAR --- */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -93,6 +93,17 @@ export default function Login() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* --- LOGO --- */}
+      <Link
+        to="/"
+        className="absolute top-6 left-6 flex items-center gap-2 text-[#0a2e1a] hover:text-[#16a34a] transition-colors z-10"
+      >
+        <div className="w-8 h-8 rounded-xl bg-[#dcfce7] flex items-center justify-center">
+          <HeartPulse size={18} className="text-[#16a34a]" />
+        </div>
+        <span className="font-black text-lg tracking-tight">MyFlexio</span>
+      </Link>
 
       {/* --- LOGIN KART --- */}
       <motion.div

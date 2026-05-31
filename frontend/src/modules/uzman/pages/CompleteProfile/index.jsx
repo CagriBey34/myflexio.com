@@ -189,7 +189,7 @@ export default function CompleteProfile() {
                 return (
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                         <div className="text-center mb-6">
-                            <User className="mx-auto text-primary-600 mb-2" size={40} />
+                            <User className="mx-auto text-green-600 mb-2" size={40} />
                             <h3 className="text-2xl font-bold text-gray-900">Kişisel Bilgiler</h3>
                             <p className="text-gray-600 mt-2">Temel bilgilerinizi girin</p>
                         </div>
@@ -208,7 +208,7 @@ export default function CompleteProfile() {
                                     required
                                     value={formData.cinsiyet}
                                     onChange={(e) => setFormData({ ...formData, cinsiyet: e.target.value })}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white text-gray-900"
                                 >
                                     <option value="">Seçiniz</option>
                                     <option value="erkek">Erkek</option>
@@ -264,7 +264,7 @@ export default function CompleteProfile() {
                 return (
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                         <div className="text-center mb-6">
-                            <GraduationCap className="mx-auto text-primary-600 mb-2" size={40} />
+                            <GraduationCap className="mx-auto text-green-600 mb-2" size={40} />
                             <h3 className="text-2xl font-bold text-gray-900">Eğitim Bilgileri</h3>
                             <p className="text-gray-600 mt-2">Akademik geçmişiniz</p>
                         </div>
@@ -296,7 +296,7 @@ export default function CompleteProfile() {
                                 onChange={(e) => setFormData({ ...formData, biyografi: e.target.value })}
                                 maxLength={500}
                                 rows={6}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
                                 placeholder="Kendinizden bahsedin, deneyimlerinizi paylaşın..."
                             />
                             <p className="text-sm text-gray-500 mt-1">{formData.biyografi.length}/500</p>
@@ -308,7 +308,7 @@ export default function CompleteProfile() {
                 return (
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                         <div className="text-center mb-6">
-                            <Award className="mx-auto text-primary-600 mb-2" size={40} />
+                            <Award className="mx-auto text-green-600 mb-2" size={40} />
                             <h3 className="text-2xl font-bold text-gray-900">Uzmanlık Alanları</h3>
                             <p className="text-gray-600 mt-2">Hangi alanlarda uzmanlaştınız?</p>
                         </div>
@@ -328,7 +328,7 @@ export default function CompleteProfile() {
                                             type="button"
                                             onClick={() => toggleExpertise(category, option)}
                                             className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${formData.uzmanlikAlanlari[category].includes(option)
-                                                    ? 'bg-primary-600 text-white'
+                                                    ? 'bg-green-600 text-white'
                                                     : 'bg-white text-gray-700 hover:bg-gray-100'
                                                 }`}
                                         >
@@ -345,7 +345,7 @@ export default function CompleteProfile() {
                 return (
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                         <div className="text-center mb-6">
-                            <FileText className="mx-auto text-primary-600 mb-2" size={40} />
+                            <FileText className="mx-auto text-green-600 mb-2" size={40} />
                             <h3 className="text-2xl font-bold text-gray-900">Sertifikalar</h3>
                             <p className="text-gray-600 mt-2">Sertifikalarınızı ekleyin (Opsiyonel)</p>
                         </div>
@@ -400,7 +400,7 @@ export default function CompleteProfile() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white py-12 px-4">
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-white py-12 px-4">
             <div className="max-w-3xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -413,7 +413,7 @@ export default function CompleteProfile() {
                             {[1, 2, 3, 4].map((step) => (
                                 <div
                                     key={step}
-                                    className={`flex-1 h-2 rounded-full mx-1 transition-colors ${step <= currentStep ? 'bg-primary-600' : 'bg-gray-200'
+                                    className={`flex-1 h-2 rounded-full mx-1 transition-colors ${step <= currentStep ? 'bg-green-600' : 'bg-gray-200'
                                         }`}
                                 />
                             ))}
@@ -433,19 +433,19 @@ export default function CompleteProfile() {
                         {/* Navigation */}
                         <div className="flex gap-4 mt-8">
                             {currentStep > 1 && (
-                                <Button type="button" variant="outline" onClick={handlePrev} className="flex-1" size="lg">
+                                <Button type="button" variant="green-outline" onClick={handlePrev} className="flex-1" size="lg">
                                     <ChevronLeft size={20} />
                                     Geri
                                 </Button>
                             )}
 
                             {currentStep < totalSteps ? (
-                                <Button type="button" onClick={handleNext} className="flex-1" size="lg">
+                                <Button type="button" variant="green" onClick={handleNext} className="flex-1" size="lg">
                                     Devam Et
                                     <ChevronRight size={20} />
                                 </Button>
                             ) : (
-                                <Button type="submit" loading={loading} className="flex-1" size="lg">
+                                <Button type="submit" variant="green" loading={loading} className="flex-1" size="lg">
                                     Profili Tamamla
                                 </Button>
                             )}

@@ -124,14 +124,14 @@ export default function Home() {
           </div>
           <span className="text-white text-xl font-black tracking-tight">MyFlexio</span>
         </div>
-        <div className="hidden md:flex items-center gap-8 text-white/80 text-sm font-medium">
+        {/*  <div className="hidden md:flex items-center gap-8 text-white/80 text-sm font-medium">
           <a href="#nasil-calisir" className="hover:text-white transition-colors">Nasıl Çalışır?</a>
           <a href="#tedavi-alanlari" className="hover:text-white transition-colors">Tedavi Alanları</a>
           <a href="#uzmanlar" className="hover:text-white transition-colors">Uzmanlar</a>
           <a href="#blog" className="hover:text-white transition-colors">Blog</a>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="text-white/80 text-sm font-medium hover:text-white transition-colors px-4 py-2">
+        </div> */}
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-black/20 backdrop-blur-md p-2 rounded-full">
+          <Link to="/login" className="bg-[#ffff] text-[#0a2e1a] text-sm font-bold px-5 py-2.5 rounded-full hover:bg-[#22c55e] transition-colors">
             Giriş Yap
           </Link>
           <Link to="/register" className="bg-[#4ade80] text-[#0a2e1a] text-sm font-bold px-5 py-2.5 rounded-full hover:bg-[#22c55e] transition-colors">
@@ -166,7 +166,7 @@ export default function Home() {
             </motion.h1>
 
             <motion.p variants={fadeUp} className="text-white/70 text-lg leading-relaxed mb-10 max-w-lg">
-              Uzman fizyoterapistler ve sana özel hazırlanan video eğitimleriyle
+              Uzman fizyoterapistler ile
               iyileşme sürecini bugün başlat.
             </motion.p>
 
@@ -184,7 +184,7 @@ export default function Home() {
               {[
                 { icon: <ShieldCheck size={15} />, text: 'KVKK Uyumlu' },
                 { icon: <Award size={15} />, text: 'Lisanslı Uzmanlar' },
-                { icon: <Star size={15} />, text: '4.8/5 Kullanıcı Puanı' },
+                {/*   { icon: <Star size={15} />, text: '4.8/5 Kullanıcı Puanı' }, */ }
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-2 text-white/60 text-xs font-medium">
                   <span className="text-[#4ade80]">{item.icon}</span>
@@ -210,14 +210,14 @@ export default function Home() {
                   </div>
                   <div>
                     <div className="text-white font-bold text-sm">Canlı Seans</div>
-                    <div className="text-white/50 text-xs">15 dk içinde başlıyor</div>
+                    <div className="text-white/50 text-xs">15 Dk Ön Görüşme</div>
                   </div>
                   <div className="ml-auto w-2 h-2 rounded-full bg-[#4ade80] animate-pulse" />
                 </div>
                 <div className="w-full h-36 rounded-2xl bg-[#0a2e1a]/40 flex items-center justify-center border border-white/10">
                   <Stethoscope size={48} className="text-[#4ade80]/40" strokeWidth={1} />
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                {/*    <div className="grid grid-cols-3 gap-2">
                   {[
                     { label: 'Uzman', value: '47+' },
                     { label: 'Hasta', value: '1.2K' },
@@ -228,7 +228,7 @@ export default function Home() {
                       <div className="text-white/50 text-[10px]">{s.label}</div>
                     </div>
                   ))}
-                </div>
+                </div> */}
               </div>
 
               {/* Yüzen rozetler */}
@@ -241,14 +241,14 @@ export default function Home() {
                 <span className="text-xs font-bold text-[#0a2e1a]">Seans tamamlandı ✓</span>
               </motion.div>
 
-              <motion.div
+              {/*   <motion.div
                 animate={{ y: [0, -6, 0] }}
                 transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                 className="absolute -bottom-4 -left-4 bg-white rounded-2xl px-4 py-3 shadow-xl flex items-center gap-2"
               >
                 <Activity size={16} className="text-[#0ea5e9]" />
                 <span className="text-xs font-bold text-[#0a2e1a]">İyileşme %73</span>
-              </motion.div>
+              </motion.div> */}
             </div>
           </motion.div>
         </div>
@@ -410,72 +410,12 @@ export default function Home() {
       {/* ══════════════════════════════════
           4. UZMAN KADROMUZ
       ══════════════════════════════════ */}
-      <section id="uzmanlar" className="py-24 px-6 md:px-16 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-            className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
-            <div>
-              <span className="inline-block text-[#16a34a] text-xs font-bold uppercase tracking-widest bg-[#dcfce7] px-4 py-2 rounded-full mb-4">
-                Uzman Kadromuz
-              </span>
-              <h2 className="text-3xl md:text-5xl font-black text-[#0a2e1a]">
-                Sağlığınız<br />
-                <span className="text-[#16a34a]">Uzman Ellerde</span>
-              </h2>
-              <p className="text-gray-500 text-sm mt-3 max-w-md">
-                Tüm fizyoterapistlerimiz lisanslı, tecrübeli ve Sağlık Bakanlığı tarafından onaylıdır.
-              </p>
-            </div>
-            <Link to="/uzmanlar"
-              className="inline-flex items-center gap-2 text-[#16a34a] text-sm font-bold hover:gap-3 transition-all shrink-0">
-              Tüm Uzmanları Gör
-              <ChevronRight size={16} />
-            </Link>
-          </motion.div>
 
-          {/* Slider (yatay kaydırılabilir) */}
-          <div className="overflow-x-auto pb-4 -mx-6 px-6 md:-mx-16 md:px-16">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
-              className="flex gap-5 w-max">
-              {experts.map((expert, i) => (
-                <motion.div key={i} variants={fadeUp}
-                  className="w-52 shrink-0 bg-gray-50 rounded-3xl p-5 border border-gray-100 hover:border-[#4ade80]/40 hover:shadow-md transition-all duration-300 cursor-pointer group">
-
-                  {/* Avatar */}
-                  <div className="w-full h-40 rounded-2xl mb-4 flex items-center justify-center text-3xl font-black relative overflow-hidden"
-                    style={{ background: expert.color }}>
-                    <span style={{ color: '#0a2e1a' }}>{expert.initial}</span>
-                    <div className="absolute inset-0 bg-[#0f4c35]/0 group-hover:bg-[#0f4c35]/5 transition-colors" />
-                  </div>
-
-                  {/* Diploma rozeti */}
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <ShieldCheck size={12} className="text-[#16a34a]" />
-                    <span className="text-[9px] font-black uppercase tracking-widest text-[#16a34a]">Diploması Onaylı</span>
-                  </div>
-
-                  <h4 className="font-black text-[#0a2e1a] text-base leading-tight">{expert.name}</h4>
-                  <p className="text-gray-500 text-xs mt-1">{expert.title}</p>
-                  <p className="text-gray-400 text-xs mt-0.5">{expert.specialty}</p>
-
-                  {/* Yıldızlar */}
-                  <div className="flex items-center gap-0.5 mt-3">
-                    {[...Array(5)].map((_, si) => (
-                      <Star key={si} size={10} className="text-[#fbbf24] fill-[#fbbf24]" />
-                    ))}
-                    <span className="text-[10px] text-gray-400 ml-1">5.0</span>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
       {/* ══════════════════════════════════
           5. İSTATİSTİKLER (Koyu alan)
       ══════════════════════════════════ */}
-      <section className="py-20 px-6 md:px-16 relative overflow-hidden"
+      {/*    <section className="py-20 px-6 md:px-16 relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #0a2e1a 0%, #0f4c35 60%, #1a6b4a 100%)' }}>
         <div className="max-w-7xl mx-auto">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
@@ -493,70 +433,12 @@ export default function Home() {
             ))}
           </motion.div>
         </div>
-      </section>
+      </section> */}
 
       {/* ══════════════════════════════════
           6. BLOGDAN İPUÇLARI
       ══════════════════════════════════ */}
-      <section id="blog" className="py-24 px-6 md:px-16 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-            className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
-            <div>
-              <span className="inline-block text-[#16a34a] text-xs font-bold uppercase tracking-widest bg-[#dcfce7] px-4 py-2 rounded-full mb-4">
-                Sağlık Blogu
-              </span>
-              <h2 className="text-3xl md:text-5xl font-black text-[#0a2e1a]">
-                Blogdan İpuçları
-              </h2>
-            </div>
-            <Link to="/blog"
-              className="inline-flex items-center gap-2 text-[#16a34a] text-sm font-bold hover:gap-3 transition-all shrink-0">
-              Tüm Yazıları Gör
-              <ChevronRight size={16} />
-            </Link>
-          </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {blogPosts.map((post, i) => (
-              <motion.div key={i} variants={fadeUp}
-                className="group bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 hover:border-[#4ade80]/40 hover:shadow-lg transition-all duration-300 cursor-pointer">
-
-                {/* Üst renk şeridi */}
-                <div className="h-2 w-full" style={{ background: post.tagColor }} />
-
-                <div className="p-7">
-                  <div className="inline-flex items-center gap-1.5 mb-4"
-                    style={{ background: post.color }}>
-                    <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full"
-                      style={{ color: post.tagColor }}>
-                      {post.tag}
-                    </span>
-                  </div>
-
-                  <h3 className="text-base font-black text-[#0a2e1a] leading-snug mb-3 group-hover:text-[#16a34a] transition-colors">
-                    {post.title}
-                  </h3>
-                  <p className="text-gray-500 text-sm leading-relaxed mb-5">
-                    {post.desc}
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-gray-400 text-xs">
-                      <BookOpen size={12} />
-                      {post.readTime}
-                    </div>
-                    <span className="text-[#16a34a] text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
-                      Oku <ArrowRight size={12} />
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
 
       {/* ══════════════════════════════════
           7. CTA
@@ -613,35 +495,35 @@ export default function Home() {
               </p>
             </div>
 
-            <div>
+            {/*     <div>
               <div className="text-white font-bold text-sm mb-4">Platform</div>
               <ul className="space-y-2.5">
                 {['Özellikler', 'Fiyatlandırma', 'Uzmanlar İçin', 'Kurumsal'].map((item, i) => (
                   <li key={i}><a href="#" className="text-white/50 text-sm hover:text-white transition-colors">{item}</a></li>
                 ))}
               </ul>
-            </div>
+            </div> */}
 
-            <div>
+            {/*    <div>
               <div className="text-white font-bold text-sm mb-4">Şirket</div>
               <ul className="space-y-2.5">
                 {['Hakkımızda', 'Blog', 'Kariyer', 'İletişim', 'KVKK'].map((item, i) => (
                   <li key={i}><a href="#" className="text-white/50 text-sm hover:text-white transition-colors">{item}</a></li>
                 ))}
               </ul>
-            </div>
+            </div> */}
           </div>
 
           <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-white/30 text-xs">© 2024 MyFlexio. Tüm hakları saklıdır.</p>
-            <div className="flex gap-6 text-white/30 text-xs">
+            <p className="text-white/30 text-xs">© 2026 MyFlexio. Tüm hakları saklıdır.</p>
+           {/*  <div className="flex gap-6 text-white/30 text-xs">
               <a href="#" className="hover:text-white transition-colors">Gizlilik Politikası</a>
               <a href="#" className="hover:text-white transition-colors">Kullanım Şartları</a>
               <a href="#" className="hover:text-white transition-colors">Çerez Politikası</a>
-            </div>
+            </div> */}
           </div>
 
-          <div className="mt-8 overflow-hidden">
+          <div className="mt-3 overflow-hidden">
             <div className="text-white/5 font-black text-[7rem] md:text-[11rem] leading-none tracking-tighter text-center select-none">
               MyFlexio
             </div>

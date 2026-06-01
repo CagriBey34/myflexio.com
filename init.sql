@@ -299,7 +299,9 @@ CREATE TABLE `uzman_profiles` (
   `evde_seans_ucreti` decimal(10,2) DEFAULT NULL,
   `ortalama_rating` decimal(3,2) DEFAULT '0.00',
   `toplam_yorum_sayisi` int DEFAULT '0',
-  `toplam_randevu_sayisi` int DEFAULT '0'
+  `toplam_randevu_sayisi` int DEFAULT '0',
+  `iban_no` varchar(34) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `iban_ad_soyad` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

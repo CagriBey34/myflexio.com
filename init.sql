@@ -185,6 +185,10 @@ CREATE TABLE `randevular` (
   `kesin_tarih` datetime DEFAULT NULL,
   `hasta_notu` text COLLATE utf8mb4_unicode_ci,
   `randevu_tipi` enum('normal','on_gorusme') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'normal',
+  `uzman_seans_onayladi` tinyint(1) DEFAULT 0,
+  `uzman_seans_onaylama_tarihi` timestamp NULL DEFAULT NULL,
+  `hasta_seans_onayladi` tinyint(1) DEFAULT 0,
+  `hasta_seans_onaylama_tarihi` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -653,11 +657,32 @@ CREATE TABLE IF NOT EXISTS `tedavi_planlari` (
   `seans_ucreti` decimal(10,2) NOT NULL,
   `toplam_ucret` decimal(10,2) NOT NULL,
   `notlar` text DEFAULT NULL,
+  `durum` enum('beklemede_odeme','dekont_yuklendi','aktif') NOT NULL DEFAULT 'beklemede_odeme',
+  `dekont_url` varchar(500) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_tp_uzman` FOREIGN KEY (`uzman_profile_id`) REFERENCES `uzman_profiles` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_tp_hasta` FOREIGN KEY (`hasta_profile_id`) REFERENCES `hasta_profiles` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Tablo yapısı `seanslar`
+--
+CREATE TABLE IF NOT EXISTS `seanslar` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `tedavi_plani_id` int NOT NULL,
+  `seans_no` int NOT NULL,
+  `tarih` datetime DEFAULT NULL,
+  `durum` enum('bekliyor','aktif','tamamlandi') NOT NULL DEFAULT 'bekliyor',
+  `uzman_seans_onayladi` tinyint(1) NOT NULL DEFAULT 0,
+  `uzman_seans_onaylama_tarihi` datetime DEFAULT NULL,
+  `hasta_seans_onayladi` tinyint(1) NOT NULL DEFAULT 0,
+  `hasta_seans_onaylama_tarihi` datetime DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `tedavi_plani_id` (`tedavi_plani_id`),
+  CONSTRAINT `fk_seans_plan` FOREIGN KEY (`tedavi_plani_id`) REFERENCES `tedavi_planlari` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 COMMIT;

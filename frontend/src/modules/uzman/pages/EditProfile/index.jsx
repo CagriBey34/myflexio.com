@@ -569,8 +569,8 @@ export default function EditProfile() {
     };
 
     return (
-        <div className="bg-[#f0fdf4] min-h-screen py-12 px-4 md:px-8">
-            <div className="max-w-3xl mx-auto">
+        <div className="bg-[#f0fdf4] min-h-screen py-6 sm:py-10 md:py-12 px-3 sm:px-5 md:px-8">
+            <div className="max-w-3xl mx-auto pb-28 lg:pb-8">
                 <button
                     onClick={() => navigate('/uzman/profile')}
                     className="flex items-center gap-2 text-[#16a34a] hover:text-[#0a2e1a] font-bold text-sm mb-6 transition-colors"
@@ -582,13 +582,13 @@ export default function EditProfile() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="bg-white rounded-[2.5rem] shadow-xl shadow-green-900/5 border border-gray-100 p-8 md:p-12"
+                    className="bg-white rounded-[2rem] sm:rounded-[2.5rem] shadow-xl shadow-green-900/5 border border-gray-100 p-5 sm:p-7 md:p-10"
                 >
-                    <div className="mb-10">
+                    <div className="mb-8 sm:mb-10">
                         <span className="inline-block text-[#16a34a] text-xs font-bold uppercase tracking-widest bg-[#dcfce7] px-4 py-2 rounded-full mb-4">
                             Profili Düzenle
                         </span>
-                        <h1 className="text-3xl md:text-4xl font-black text-[#0a2e1a] leading-tight">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0a2e1a] leading-tight">
                             Bilgilerini Güncelle
                         </h1>
                     </div>

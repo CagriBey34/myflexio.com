@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Users, UserCheck, FileText, MessageSquare, TrendingUp, Clock, Calendar } from 'lucide-react';
+import { Users, UserCheck, Clock, Calendar } from 'lucide-react';
 import { getDashboardStats } from '../../services/adminService';
 
 export default function AdminDashboard() {
@@ -41,20 +41,20 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 pb-24 lg:pb-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-600 mt-1">Sistem istatistikleri ve yönetim</p>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+        <p className="text-gray-600 mt-1 text-sm">Sistem istatistikleri ve yönetim</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
         {/* Total Users */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-lg p-6"
+          className="bg-white rounded-xl shadow-lg p-4 sm:p-5 md:p-6"
         >
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-blue-100 rounded-lg">
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-xl shadow-lg p-6"
+          className="bg-white rounded-xl shadow-lg p-4 sm:p-5 md:p-6"
         >
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-yellow-100 rounded-lg">
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-xl shadow-lg p-6"
+          className="bg-white rounded-xl shadow-lg p-4 sm:p-5 md:p-6"
         >
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-green-100 rounded-lg">
@@ -122,33 +122,16 @@ export default function AdminDashboard() {
           <p className="text-gray-600 text-sm">Aktif Uzman</p>
         </motion.div>
 
-        {/* Total Articles */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white rounded-xl shadow-lg p-6"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <FileText className="text-purple-600" size={24} />
-            </div>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900">
-            {stats?.totalArticles || 0}
-          </h3>
-          <p className="text-gray-600 text-sm">Yayınlanan Makale</p>
-        </motion.div>
       </div>
 
       {/* Additional Stats */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
         {/* System Stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-white rounded-xl shadow-lg p-6"
+          className="bg-white rounded-xl shadow-lg p-4 sm:p-5 md:p-6"
         >
           <h2 className="text-xl font-bold text-gray-900 mb-4">Sistem İstatistikleri</h2>
           <div className="space-y-3">
@@ -172,7 +155,7 @@ export default function AdminDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="bg-white rounded-xl shadow-lg p-6"
+          className="bg-white rounded-xl shadow-lg p-4 sm:p-5 md:p-6"
         >
           <h2 className="text-xl font-bold text-gray-900 mb-4">Son Aktiviteler</h2>
           <div className="space-y-3">

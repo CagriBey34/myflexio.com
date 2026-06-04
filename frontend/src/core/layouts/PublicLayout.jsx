@@ -45,7 +45,6 @@ export default function PublicLayout() {
                         <div className="flex flex-col gap-8">
                             <Link to="/uzmanlar" className="text-4xl font-black tracking-tighter text-[#0A2E26] hover:text-[#0D9488] transition-colors">Uzman Bul.</Link>
                             <Link to="/nasil-calisir" className="text-4xl font-black tracking-tighter text-[#0A2E26] hover:text-[#0D9488] transition-colors">Sistem.</Link>
-                            <Link to="/articles" className="text-4xl font-black tracking-tighter text-[#0A2E26] hover:text-[#0D9488] transition-colors">Blog.</Link>
                         </div>
                         
                         <div className="mt-auto border-t border-black/10 pt-8 flex flex-col gap-6">

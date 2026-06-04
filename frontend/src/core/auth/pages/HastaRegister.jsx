@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Input from '../../../shared/components/ui/Input';
 import Button from '../../../shared/components/ui/Button';
+import KVKKModal from '../../../shared/components/ui/KVKKModal';
 import api from '../../../shared/services/api';
 
 export default function HastaRegister() {
@@ -16,9 +17,9 @@ export default function HastaRegister() {
     ad: '', soyad: '', email: '', password: '', passwordConfirm: '', telefon: '', kvkk_onay: false,
   });
   
-  // Status states for Popups
-  const [status, setStatus] = useState({ type: null, message: '' }); // 'success' | 'error' | null
+  const [status, setStatus] = useState({ type: null, message: '' });
   const [loading, setLoading] = useState(false);
+  const [kvkkModalOpen, setKvkkModalOpen] = useState(false);
 
   const handleNext = () => {
     if (step === 1 && (!formData.ad || !formData.soyad || !formData.email || !formData.telefon)) {
@@ -57,7 +58,7 @@ export default function HastaRegister() {
   };
 
   return (
-    <div className="w-full min-h-[calc(100dvh-80px)] flex items-center justify-center px-4 py-8 overflow-hidden relative bg-white font-sans">
+    <div className="w-full min-h-screen flex items-center justify-center px-4 py-10 overflow-hidden relative bg-white font-sans">
       
       {/* --- ARKA PLAN DEKORATİF BLURLAR --- */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -100,7 +101,7 @@ export default function HastaRegister() {
       {/* --- FORM CONTAINER --- */}
       <motion.div
         layout
-        className="bg-white border border-gray-100 p-8 md:p-12 rounded-[3rem] shadow-2xl shadow-green-900/5 max-w-lg w-full relative z-10"
+        className="bg-white border border-gray-100 p-5 sm:p-8 md:p-12 rounded-[2rem] sm:rounded-[3rem] shadow-2xl shadow-green-900/5 max-w-lg w-full relative z-10"
       >
         {/* Step Indicator */}
         <div className="flex justify-center gap-2 mb-10">
@@ -112,7 +113,7 @@ export default function HastaRegister() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#dcfce7] text-[#16a34a] mb-4">
             {step === 1 ? <User size={24} /> : <ShieldCheck size={24} />}
           </div>
-          <h2 className="text-3xl md:text-4xl font-black text-[#0a2e1a] tracking-tight mb-2">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0a2e1a] tracking-tight mb-2">
             {step === 1 ? 'Sizi Tanıyalım' : 'Güvenlik'}
           </h2>
           <p className="text-sm text-gray-500 font-medium">
@@ -131,7 +132,7 @@ export default function HastaRegister() {
                 transition={{ duration: 0.3 }}
                 className="space-y-5 w-full"
               >
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                   <Input label="Ad" icon={User} value={formData.ad} onChange={(e) => setFormData({ ...formData, ad: e.target.value })} placeholder="Adınız" />
                   <Input label="Soyad" icon={User} value={formData.soyad} onChange={(e) => setFormData({ ...formData, soyad: e.target.value })} placeholder="Soyadınız" />
                 </div>
@@ -154,15 +155,27 @@ export default function HastaRegister() {
                 <Input label="Şifre" type="password" icon={Lock} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
                 <Input label="Şifre Tekrar" type="password" icon={Lock} value={formData.passwordConfirm} onChange={(e) => setFormData({ ...formData, passwordConfirm: e.target.value })} placeholder="••••••••" />
                 
-                <div 
-                  className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 mt-4 cursor-pointer hover:border-[#4ade80]/40 transition-colors select-none"
-                  onClick={() => setFormData({...formData, kvkk_onay: !formData.kvkk_onay})}
-                >
-                  <div className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${formData.kvkk_onay ? 'bg-[#16a34a] border-[#16a34a]' : 'border-gray-300 bg-white'}`}>
+                <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 mt-4 hover:border-[#4ade80]/40 transition-colors select-none">
+                  <div
+                    className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all cursor-pointer mt-0.5 ${formData.kvkk_onay ? 'bg-[#16a34a] border-[#16a34a]' : 'border-gray-300 bg-white'}`}
+                    onClick={() => setFormData({...formData, kvkk_onay: !formData.kvkk_onay})}
+                  >
                     {formData.kvkk_onay && <Check size={16} className="text-white" />}
                   </div>
-                  <span className="text-xs font-bold text-gray-600 leading-snug">Kişisel verilerimin işlenmesine dair KVKK aydınlatma metnini okudum.</span>
+                  <span className="text-xs font-bold text-gray-600 leading-snug">
+                    myflexio tarafından hazırlanan{' '}
+                    <button type="button" onClick={() => setKvkkModalOpen(true)} className="text-[#16a34a] underline underline-offset-2 hover:text-[#0a2e1a] transition-colors">
+                      KVKK Aydınlatma Metni
+                    </button>
+                    &apos;ni okudum. Sağlık verilerim dahil kişisel verilerimin, bana özel tedavi planı hazırlanması ve uzman fizyoterapistle eşleştirilmem amacıyla işlenmesine açık rıza gösteriyorum.
+                  </span>
                 </div>
+                <KVKKModal
+                  open={kvkkModalOpen}
+                  onClose={() => setKvkkModalOpen(false)}
+                  onAccept={() => setFormData({ ...formData, kvkk_onay: true })}
+                  tip="hasta"
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
                   <button type="button" onClick={() => setStep(1)} className="flex items-center justify-center gap-2 text-sm font-black text-gray-400 hover:text-[#0a2e1a] transition-colors py-4">

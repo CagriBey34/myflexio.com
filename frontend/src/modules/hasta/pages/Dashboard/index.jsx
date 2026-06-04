@@ -57,19 +57,19 @@ export default function HastaDashboard() {
   const isProfileComplete = profile?.profile_completed_at;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-12">
-      
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 md:space-y-8 pb-24 lg:pb-12">
+
       {/* --- HEADER: KARŞILAMA --- */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6">
         <div>
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter italic">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter italic">
             Hoş Geldin, {profile?.ad} ✨
           </h1>
           <p className="text-slate-500 font-bold mt-1 uppercase tracking-widest text-[10px]">
              Sağlık Yolculuğun Burada Başlıyor
           </p>
         </div>
-        <div className="flex items-center gap-3 bg-white p-2 pr-6 rounded-3xl border border-slate-100 shadow-sm w-fit">
+        <div className="flex items-center gap-2 sm:gap-3 bg-white p-2 pr-4 sm:pr-6 rounded-3xl border border-slate-100 shadow-sm w-fit">
             <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 font-black italic">
                 {profile?.ad?.[0]}
             </div>
@@ -87,14 +87,14 @@ export default function HastaDashboard() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-blue-600 rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl shadow-blue-200 relative overflow-hidden"
+          className="bg-blue-600 rounded-[2rem] p-4 sm:p-6 md:p-8 lg:p-12 text-white shadow-2xl shadow-blue-200 relative overflow-hidden"
         >
           <Activity size={200} className="absolute -right-10 -bottom-10 text-white opacity-10" />
           <div className="relative z-10 max-w-2xl">
-            <h3 className="text-3xl md:text-4xl font-black tracking-tighter mb-4 italic">
+            <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter mb-3 italic">
               Profilinizi Tamamlayın!
             </h3>
-            <p className="text-blue-100 font-bold text-lg mb-8 leading-relaxed">
+            <p className="text-blue-100 font-bold text-sm sm:text-base lg:text-lg mb-5 sm:mb-8 leading-relaxed">
               Size en uygun uzmanları yapay zeka ile eşleştirebilmemiz için ağrı bölgesi ve tıbbi geçmişinizi eklemelisiniz.
             </p>
             <Button
@@ -108,42 +108,41 @@ export default function HastaDashboard() {
       )}
 
       {/* --- QUICK STATS --- */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
         {[
-          { label: 'Aktif Randevular', val: '0', icon: <Calendar size={22}/>, bg: 'bg-white', text: 'text-blue-600' },
-          { label: 'Tıbbi Raporlar', val: profile?.medicalReports?.length || 0, icon: <FileText size={22}/>, bg: 'bg-white', text: 'text-indigo-600' },
-          { label: 'Sağlık Puanı', val: isProfileComplete ? '85/100' : '20/100', icon: <Activity size={22}/>, bg: 'bg-slate-900', text: 'text-white' },
+          { label: 'Aktif Randevular', val: '0', icon: <Calendar size={20}/>, bg: 'bg-white', text: 'text-blue-600' },
+          { label: 'Tıbbi Raporlar', val: profile?.medicalReports?.length || 0, icon: <FileText size={20}/>, bg: 'bg-white', text: 'text-indigo-600' },
         ].map((stat, i) => (
           <motion.div
             key={i}
-            whileHover={{ y: -5 }}
-            className={`${stat.bg} ${stat.bg === 'bg-white' ? 'border border-slate-100' : ''} p-8 rounded-[2.5rem] shadow-sm flex items-center justify-between`}
+            whileHover={{ y: -3 }}
+            className="bg-white border border-slate-100 p-4 sm:p-5 md:p-6 rounded-[1.5rem] sm:rounded-[2rem] shadow-sm flex items-center justify-between"
           >
             <div>
-                <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${stat.bg === 'bg-white' ? 'text-slate-400' : 'text-slate-500'}`}>
+                <p className="text-[10px] font-black uppercase tracking-widest mb-1 text-slate-400">
                     {stat.label}
                 </p>
-                <p className={`text-4xl font-black tracking-tighter ${stat.bg === 'bg-white' ? 'text-slate-900' : 'text-white'}`}>
+                <p className="text-2xl sm:text-3xl font-black tracking-tighter text-slate-900">
                     {stat.val}
                 </p>
             </div>
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${stat.bg === 'bg-white' ? 'bg-blue-50 ' + stat.text : 'bg-slate-800 text-blue-400'}`}>
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-blue-50 ${stat.text}`}>
                 {stat.icon}
             </div>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8">
-        
+      <div className="grid lg:grid-cols-12 gap-3 sm:gap-4 md:gap-6 lg:gap-8">
+
         {/* --- LOKASYON & ÖZET (BENTO) --- */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className="lg:col-span-8 space-y-4 sm:space-y-5 md:space-y-6">
             {isProfileComplete ? (
-                <div className="bg-white border border-slate-100 rounded-[3rem] p-8 md:p-10 shadow-sm relative overflow-hidden">
-                    <h2 className="text-2xl font-black text-slate-900 mb-8 tracking-tight flex items-center gap-2">
+                <div className="bg-white border border-slate-100 rounded-[2rem] p-4 sm:p-6 md:p-8 lg:p-10 shadow-sm relative overflow-hidden">
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 mb-4 sm:mb-6 md:mb-8 tracking-tight flex items-center gap-2">
                         <ClipboardCheck className="text-blue-600" /> Sağlık Özeti
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6 relative z-10">
                         <div className="flex items-center gap-4 bg-slate-50 p-6 rounded-3xl">
                             <div className="p-3 bg-white rounded-xl text-blue-600 shadow-sm"><MapPin size={20}/></div>
                             <div>
@@ -189,14 +188,14 @@ export default function HastaDashboard() {
         </div>
 
         {/* --- HIZLI İŞLEMLER --- */}
-        <div className="lg:col-span-4 bg-white border border-slate-100 rounded-[3rem] p-8 shadow-sm h-fit">
-            <h2 className="text-xl font-black text-slate-900 mb-8 uppercase tracking-tighter italic">Hızlı İşlemler</h2>
+        <div className="lg:col-span-4 bg-white border border-slate-100 rounded-[2rem] p-4 sm:p-5 md:p-6 lg:p-8 shadow-sm h-fit">
+            <h2 className="text-base sm:text-lg md:text-xl font-black text-slate-900 mb-4 sm:mb-5 md:mb-6 lg:mb-8 uppercase tracking-tighter italic">Hızlı İşlemler</h2>
             <div className="space-y-3">
                 {[
                     { label: 'Uzman Ara', to: '/hasta/uzmanlar', icon: <Search size={18}/>, disabled: !isProfileComplete, primary: true },
                     { label: 'Değerlendirme Yap', to: '/hasta/assessment', icon: <ClipboardCheck size={18}/>, disabled: !isProfileComplete, primary: false },
                     { label: 'Profilimi Gör', to: '/hasta/profile', icon: <User size={18}/>, disabled: false, primary: false },
-                    { label: 'Blogu İncele', to: '/articles', icon: <FileText size={18}/>, disabled: false, primary: false },
+        {/*             { label: 'Blogu İncele', to: '/articles', icon: <FileText size={18}/>, disabled: false, primary: false }, */}
                 ].map((action, i) => (
                     <button
                         key={i}

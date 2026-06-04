@@ -51,8 +51,8 @@ export default function UzmanArticles() {
   };
 
   return (
-    <div className="bg-[#f0fdf4] min-h-screen py-12 px-4 md:px-8">
-        <div className="max-w-6xl mx-auto space-y-8 pb-20">
+    <div className="bg-[#f0fdf4] min-h-screen py-6 sm:py-10 md:py-12 px-3 sm:px-5 md:px-8">
+        <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6 md:space-y-8 pb-28 lg:pb-8">
         <ArticleHeader onNew={() => navigate('/uzman/articles/new')} />
 
         <ArticleTabSystem activeTab={activeTab} setActiveTab={(tab) => { setActiveTab(tab); setPage(1); }} />

@@ -718,9 +718,9 @@ export default function Profiller() {
     const list = tab === 'hastalar' ? hastalar : uzmanlar;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-5 md:space-y-6 pb-24 lg:pb-6">
             <div>
-                <h1 className="text-3xl font-bold text-gray-900">Profiller</h1>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">Profiller</h1>
                 <p className="text-gray-500 mt-1 text-sm">Tüm kullanıcı profillerini görüntüleyin</p>
             </div>
 
@@ -758,7 +758,7 @@ export default function Profiller() {
                     ))}
                 </div>
             ) : list.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
+                <div className="bg-white rounded-2xl border border-gray-100 p-8 sm:p-12 md:p-16 text-center">
                     <p className="font-bold text-gray-400">Kayıt bulunamadı</p>
                 </div>
             ) : (

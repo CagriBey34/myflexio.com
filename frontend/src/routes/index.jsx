@@ -24,8 +24,6 @@ import UzmanDashboard from '../modules/uzman/pages/Dashboard';
 import UzmanProfile from '../modules/uzman/pages/Profile';
 import UzmanCompleteProfile from '../modules/uzman/pages/CompleteProfile';
 import UzmanEditProfile from '../modules/uzman/pages/EditProfile'; // YENİ: edit sayfası
-import UzmanArticles from '../modules/uzman/pages/Articles';
-import ArticleEditor from '../modules/uzman/pages/ArticleEditor';
 import UzmanReviews from '../modules/uzman/pages/Reviews';
 import UzmanRandevular from '../modules/uzman/pages/Randevular';
 
@@ -41,10 +39,6 @@ import UzmanSearch from '../modules/hasta/pages/UzmanSearch';
 import UzmanProfileDetail from '../modules/hasta/pages/UzmanProfileDetail';
 import UzmanProfileView from '../modules/hasta/pages/UzmanProfile';
 import Randevularim from '../modules/hasta/pages/Randevularim';
-
-// Articles (Public)
-import ArticleList from '../modules/articles/pages/ArticleList';
-import ArticleDetail from '../modules/articles/pages/ArticleDetail';
 
 // Admin
 import AdminDashboard from '../modules/admin/pages/Dashboard';
@@ -66,14 +60,6 @@ const router = createBrowserRouter([
             {
                 path: '/',
                 element: <Home />,
-            },
-            {
-                path: '/articles',
-                element: <ArticleList />,
-            },
-            {
-                path: '/articles/:id',
-                element: <ArticleDetail />,
             },
         ],
     },
@@ -125,18 +111,6 @@ const router = createBrowserRouter([
                 // YENİ: edit route eklendi
                 path: '/uzman/profile/edit',
                 element: <UzmanEditProfile />,
-            },
-            {
-                path: '/uzman/articles',
-                element: <UzmanArticles />,
-            },
-            {
-                path: '/uzman/articles/new',
-                element: <ArticleEditor />,
-            },
-            {
-                path: '/uzman/articles/:id/edit',
-                element: <ArticleEditor />,
             },
             {
                 path: '/uzman/reviews',

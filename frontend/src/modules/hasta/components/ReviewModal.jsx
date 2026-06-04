@@ -14,6 +14,11 @@ export default function ReviewModal({ isOpen, onClose, uzmanId, existingReview, 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!uzmanId) {
+            setError('Uzman bilgisi yüklenemedi. Lütfen sayfayı yenileyip tekrar deneyin.');
+            return;
+        }
+
         if (rating === 0) {
             setError('Lütfen bir puan seçerek deneyiminizi değerlendirin.');
             return;

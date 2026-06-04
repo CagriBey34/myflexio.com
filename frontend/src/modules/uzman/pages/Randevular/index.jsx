@@ -4,42 +4,23 @@ import {
     Calendar, CheckCircle, XCircle,
     ChevronDown, User, AlertCircle,
     Video, Edit3, Loader2, Activity,
-    ClipboardList, MapPin, FileText, ExternalLink, PlayCircle,
+    ClipboardList, MapPin,
     Phone, Mail, CheckSquare
 } from 'lucide-react';
-import { getUzmanRandevular, createTedaviPlani, getUzmanTedaviPlanlari, aktiveTedaviPlani, uzmanSeansVer, getUzmanEslesmeler, getEslesmeSeanslari, setSeansTargihi, uzmanSeansOnay } from '../../services/uzmanService';
+import { getUzmanRandevular, createTedaviPlani, getUzmanTedaviPlanlari, uzmanSeansVer, getUzmanEslesmeler, getEslesmeSeanslari, setSeansTargihi, uzmanSeansOnay } from '../../services/uzmanService';
 import api from '../../../../shared/services/api';
-
-const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/api$/, '');
 
 const PLAN_DURUM_CONFIG = {
     beklemede_odeme: { label: 'Ödeme Bekleniyor', color: 'bg-amber-100 text-amber-700' },
-    dekont_yuklendi: { label: 'Dekont Yüklendi', color: 'bg-blue-100 text-blue-700' },
+    dekont_yuklendi: { label: 'Admin İnceliyor', color: 'bg-purple-100 text-purple-700' },
     aktif:           { label: 'Aktif', color: 'bg-green-100 text-green-700' },
 };
 
-function TedaviPlaniKarti({ plan, onRefresh }) {
-    const [loading, setLoading] = useState(false);
-    const [msg, setMsg] = useState('');
+function TedaviPlaniKarti({ plan }) {
     const durum = PLAN_DURUM_CONFIG[plan.durum] || PLAN_DURUM_CONFIG.beklemede_odeme;
-
-    const handleAktifet = async () => {
-        setLoading(true);
-        setMsg('');
-        try {
-            await aktiveTedaviPlani(plan.id);
-            setMsg('Tedavi planı aktifleştirildi.');
-            onRefresh?.();
-        } catch (e) {
-            setMsg(e.response?.data?.message || 'Hata oluştu.');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     return (
         <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm p-5 space-y-4">
-            {/* Başlık */}
             <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5 flex items-center gap-1">
@@ -52,7 +33,6 @@ function TedaviPlaniKarti({ plan, onRefresh }) {
                 </span>
             </div>
 
-            {/* Plan detayları */}
             <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="bg-gray-50 rounded-xl p-3">
                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Tür</p>
@@ -68,33 +48,10 @@ function TedaviPlaniKarti({ plan, onRefresh }) {
                 </div>
             </div>
 
-            {/* Dekont göster (dekont_yuklendi veya aktif) */}
-            {plan.dekont_url && (
-                <a
-                    href={`${API_BASE}${plan.dekont_url}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-xs font-black text-blue-600 bg-blue-50 border border-blue-100 px-4 py-3 rounded-xl hover:bg-blue-100 transition-colors"
-                >
-                    <FileText size={14} /> Yüklenen Dekontu Görüntüle
-                    <ExternalLink size={12} className="ml-auto" />
-                </a>
-            )}
-
-            {/* Aktifleştir butonu (sadece dekont_yuklendi ise) */}
             {plan.durum === 'dekont_yuklendi' && (
-                <button
-                    onClick={handleAktifet}
-                    disabled={loading}
-                    className="flex items-center justify-center gap-2 bg-[#4ade80] hover:bg-[#22c55e] text-[#0a2e1a] text-xs font-black px-5 py-3 rounded-xl uppercase tracking-widest transition-all w-full disabled:opacity-50"
-                >
-                    {loading ? <Loader2 size={14} className="animate-spin" /> : <PlayCircle size={14} />}
-                    Planı Aktifleştir
-                </button>
-            )}
-
-            {msg && (
-                <p className={`text-xs font-bold ${msg.includes('Hata') ? 'text-red-500' : 'text-green-600'}`}>{msg}</p>
+                <p className="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-100 px-4 py-3 rounded-xl flex items-center gap-2">
+                    <AlertCircle size={14} /> Dekont admin tarafından inceleniyor. Onay sonrası plan aktifleştirilecek.
+                </p>
             )}
 
             <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest text-right">
@@ -168,14 +125,17 @@ function TedaviPlaniForm({ randevu, onSaved }) {
 
     return (
         <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-[1.5rem] p-5 space-y-4">
-            <p className="text-[10px] font-black text-[#16a34a] uppercase tracking-widest flex items-center gap-1.5">
-                <ClipboardList size={12} /> Tedavi Planı Oluştur
-            </p>
+            <div>
+                <p className="text-[10px] font-black text-[#16a34a] uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                    <ClipboardList size={12} /> Seans Planı
+                </p>
+                <p className="text-xs font-bold text-gray-500">Ön görüşme sonrası tedavi türü ve seans sayısını belirleyin.</p>
+            </div>
 
             {/* Tedavi türü */}
             <div className="flex gap-3">
                 {[
-                    { value: 'online', label: '💻 Online Tedavi' },
+                    { value: 'online', label: '💻 Online' },
                     { value: 'evde',   label: '🏠 Evde Tedavi' },
                 ].map(opt => (
                     <button
@@ -226,7 +186,7 @@ function TedaviPlaniForm({ randevu, onSaved }) {
                 className="flex items-center justify-center gap-2 bg-[#4ade80] hover:bg-[#22c55e] text-[#0a2e1a] text-xs font-black px-6 py-3 rounded-xl uppercase tracking-widest transition-all shadow-md shadow-green-500/20 disabled:opacity-50 w-full"
             >
                 {loading ? <Loader2 size={16} className="animate-spin" /> : <ClipboardList size={16} />}
-                Tedavi Planını Gönder
+                Seans Planını Gönder
             </button>
 
             {error && (
@@ -243,13 +203,14 @@ function KesinTarihForm({ randevuId, mevcutTarih, onSaved }) {
     const [saat, setSaat] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [saved, setSaved] = useState(false);
+    const [editing, setEditing] = useState(!mevcutTarih);
 
     useEffect(() => {
         if (mevcutTarih) {
             const d = new Date(mevcutTarih);
-            setTarih(d.toISOString().split('T')[0]);
-            setSaat(d.toTimeString().slice(0, 5));
+            const pad = n => String(n).padStart(2, '0');
+            setTarih(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`);
+            setSaat(`${pad(d.getHours())}:${pad(d.getMinutes())}`);
         }
     }, [mevcutTarih]);
 
@@ -264,7 +225,7 @@ function KesinTarihForm({ randevuId, mevcutTarih, onSaved }) {
             await api.patch(`/uzman/randevular/${randevuId}/kesin-tarih`, {
                 kesin_tarih: `${tarih} ${saat}:00`,
             });
-            setSaved(true);
+            setEditing(false);
             onSaved?.();
         } catch (e) {
             setError(e.response?.data?.message || 'Kaydedilemedi, tekrar deneyin.');
@@ -273,10 +234,25 @@ function KesinTarihForm({ randevuId, mevcutTarih, onSaved }) {
         }
     };
 
-    if (saved) {
+    if (!editing && mevcutTarih) {
         return (
-            <div className="flex items-center gap-2 text-[#16a34a] bg-[#dcfce7] px-4 py-3 rounded-2xl text-xs font-black">
-                <CheckCircle size={16} /> Tarih ve saat başarıyla kaydedildi!
+            <div className="flex items-center justify-between bg-[#f0fdf4] border border-[#bbf7d0] rounded-[1.5rem] p-5 gap-4 flex-wrap">
+                <div>
+                    <p className="text-[10px] font-black text-[#16a34a] uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                        <CheckCircle size={12} /> Kesin Tarih & Saat
+                    </p>
+                    <p className="text-sm font-black text-[#0f4c35]">
+                        {new Date(mevcutTarih).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                        <span className="text-[#4ade80] mx-2">|</span>
+                        {new Date(mevcutTarih).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                </div>
+                <button
+                    onClick={() => setEditing(true)}
+                    className="flex items-center gap-2 bg-white border border-[#bbf7d0] text-[#16a34a] text-[10px] font-black px-4 py-2.5 rounded-xl uppercase tracking-widest hover:bg-[#dcfce7] transition-all shrink-0"
+                >
+                    <Edit3 size={12} /> Düzenle
+                </button>
             </div>
         );
     }
@@ -293,7 +269,6 @@ function KesinTarihForm({ randevuId, mevcutTarih, onSaved }) {
                         type="date"
                         value={tarih}
                         onChange={e => setTarih(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
                         className="text-sm font-bold text-[#0a2e1a] border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#4ade80] focus:border-transparent transition-all bg-white"
                     />
                 </div>
@@ -306,7 +281,7 @@ function KesinTarihForm({ randevuId, mevcutTarih, onSaved }) {
                         className="text-sm font-bold text-[#0a2e1a] border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#4ade80] focus:border-transparent transition-all bg-white"
                     />
                 </div>
-                <div className="flex items-end">
+                <div className="flex items-end gap-2">
                     <button
                         onClick={handleSave}
                         disabled={loading}
@@ -315,6 +290,14 @@ function KesinTarihForm({ randevuId, mevcutTarih, onSaved }) {
                         {loading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                         Kaydet
                     </button>
+                    {mevcutTarih && (
+                        <button
+                            onClick={() => { setEditing(false); setError(''); }}
+                            className="text-[10px] font-black text-gray-400 hover:text-gray-600 px-4 py-3 rounded-xl hover:bg-gray-100 transition-all uppercase tracking-widest"
+                        >
+                            İptal
+                        </button>
+                    )}
                 </div>
             </div>
             {error && (
@@ -437,8 +420,8 @@ function RandevuCard({ randevu, onRefresh }) {
                                 </div>
                             )}
 
-                            {/* Kesin tarih göster (herhangi bir durumda) */}
-                            {randevu.kesin_tarih && (
+                            {/* Kesin tarih göster — form olmayan durumlarda (tamamlandi/reddedildi/iptal) */}
+                            {randevu.kesin_tarih && randevu.durum !== 'beklemede' && randevu.durum !== 'onaylandi' && (
                                 <div className="bg-[#f0fdf4] rounded-[1.5rem] p-5 border border-[#bbf7d0]">
                                     <div className="text-[10px] font-black text-[#16a34a] uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
                                         <CheckCircle size={12} /> Belirlenen Tarih & Saat
@@ -450,11 +433,6 @@ function RandevuCard({ randevu, onRefresh }) {
                                         <span className="text-[#4ade80] mx-2">|</span>
                                         {new Date(randevu.kesin_tarih).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                                     </p>
-                                    {randevu.durum === 'beklemede' && (
-                                        <p className="text-[10px] text-amber-600 font-bold mt-2 flex items-center gap-1">
-                                            <AlertCircle size={12}/> Admin onayı bekleniyor — Hasta bildirim almadı
-                                        </p>
-                                    )}
                                 </div>
                             )}
 
@@ -587,9 +565,14 @@ function RandevuCard({ randevu, onRefresh }) {
                                 </div>
                             )}
 
-                            {/* Tedavi planı oluştur — onaylı veya tamamlanan ön görüşmelerde */}
-                            {isOnGorusme && (randevu.durum === 'onaylandi' || randevu.durum === 'tamamlandi') && (
+                            {/* Seans planı — ön görüşme tarih belirlendikten sonra, plan henüz gönderilmediyse */}
+                            {isOnGorusme && randevu.kesin_tarih && !randevu.plan_gonderildi && randevu.durum !== 'tamamlandi' && randevu.durum !== 'reddedildi' && randevu.durum !== 'iptal' && (
                                 <TedaviPlaniForm randevu={randevu} onSaved={onRefresh} />
+                            )}
+                            {isOnGorusme && randevu.plan_gonderildi && (
+                                <div className="flex items-center gap-2 text-[#16a34a] bg-[#dcfce7] px-4 py-3 rounded-2xl text-xs font-black">
+                                    <CheckCircle size={16} /> Seans planı hastaya iletildi.
+                                </div>
                             )}
 
                             {/* Hasta notu */}
@@ -626,7 +609,13 @@ function RandevuCard({ randevu, onRefresh }) {
 // ─── Seans kartı (aktif hasta detay sayfasında) ──────────────────────────────
 
 function SeansKarti({ seans, onRefresh }) {
-    const [tarih, setTarih] = useState(seans.tarih ? new Date(seans.tarih).toISOString().slice(0, 16) : '');
+    const toLocalDatetimeStr = (d) => {
+        const pad = n => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
+    const [tarih, setTarih] = useState(seans.tarih ? toLocalDatetimeStr(new Date(seans.tarih)) : '');
+    const [editingTarih, setEditingTarih] = useState(!seans.tarih);
     const [tarihLoading, setTarihLoading] = useState(false);
     const [tarihMsg, setTarihMsg] = useState('');
     const [seansLoading, setSeansLoading] = useState(false);
@@ -642,16 +631,18 @@ function SeansKarti({ seans, onRefresh }) {
         setTarihMsg('');
         try {
             await setSeansTargihi(seans.id, tarih.replace('T', ' ') + ':00');
-            setTarihMsg('Kaydedildi');
+            setEditingTarih(false);
+            setTarihMsg('');
             onRefresh?.();
         } catch {
-            setTarihMsg('Hata');
+            setTarihMsg('Hata oluştu.');
         } finally {
             setTarihLoading(false);
         }
     };
 
     const handleSeansVer = async () => {
+        if (!seans.tarih) return;
         setSeansLoading(true);
         try {
             await uzmanSeansOnay(seans.id);
@@ -679,8 +670,26 @@ function SeansKarti({ seans, onRefresh }) {
                 {isActive && <span className="text-[10px] font-black text-[#0f4c35] bg-[#dcfce7] px-2.5 py-1 rounded-full uppercase tracking-widest flex items-center gap-1"><Activity size={10} /> Aktif</span>}
             </div>
 
-            {/* Tarih göster veya belirle */}
-            {seans.tarih && (
+            {/* Tarih — display veya edit modu */}
+            {isActive && seans.tarih && !editingTarih && (
+                <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-black text-[#0a2e1a] flex items-center gap-2">
+                        <Calendar size={14} className="text-[#16a34a]" />
+                        {new Date(seans.tarih).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                        <span className="text-gray-300">|</span>
+                        {new Date(seans.tarih).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                    <button
+                        onClick={() => setEditingTarih(true)}
+                        className="flex items-center gap-1 bg-gray-100 hover:bg-[#dcfce7] text-[#16a34a] text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest transition-all shrink-0"
+                    >
+                        <Edit3 size={11} /> Düzenle
+                    </button>
+                </div>
+            )}
+
+            {/* Tarih sadece görüntüle (tamamlandi/kilitli) */}
+            {!isActive && seans.tarih && (
                 <p className="text-sm font-black text-[#0a2e1a] flex items-center gap-2">
                     <Calendar size={14} className="text-[#16a34a]" />
                     {new Date(seans.tarih).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -689,8 +698,8 @@ function SeansKarti({ seans, onRefresh }) {
                 </p>
             )}
 
-            {/* Tarih belirleme — sadece aktif seansta */}
-            {isActive && (
+            {/* Tarih giriş formu — aktif + (tarih yok veya düzenleme modu) */}
+            {isActive && (editingTarih || !seans.tarih) && (
                 <div className="flex items-center gap-2 flex-wrap">
                     <input
                         type="datetime-local"
@@ -701,12 +710,20 @@ function SeansKarti({ seans, onRefresh }) {
                     <button
                         onClick={handleTarihKaydet}
                         disabled={tarihLoading || !tarih}
-                        className="flex items-center gap-1.5 bg-gray-100 hover:bg-[#dcfce7] text-[#0a2e1a] text-[10px] font-black px-3 py-2 rounded-xl uppercase tracking-widest transition-all disabled:opacity-50"
+                        className="flex items-center gap-1.5 bg-[#dcfce7] hover:bg-[#4ade80] text-[#0a2e1a] text-[10px] font-black px-3 py-2 rounded-xl uppercase tracking-widest transition-all disabled:opacity-50"
                     >
                         {tarihLoading ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
                         Kaydet
                     </button>
-                    {tarihMsg && <span className="text-[10px] font-bold text-[#16a34a]">{tarihMsg}</span>}
+                    {seans.tarih && (
+                        <button
+                            onClick={() => { setEditingTarih(false); setTarihMsg(''); setTarih(toLocalDatetimeStr(new Date(seans.tarih))); }}
+                            className="text-[10px] font-black text-gray-400 hover:text-gray-600 px-2 py-2 rounded-xl hover:bg-gray-100 transition-all uppercase tracking-widest"
+                        >
+                            İptal
+                        </button>
+                    )}
+                    {tarihMsg && <span className="text-[10px] font-bold text-red-500">{tarihMsg}</span>}
                 </div>
             )}
 
@@ -717,14 +734,25 @@ function SeansKarti({ seans, onRefresh }) {
                         <CheckSquare size={13} /> Seans Verildi — Hasta onayı bekleniyor
                     </div>
                 ) : (
-                    <button
-                        onClick={handleSeansVer}
-                        disabled={seansLoading}
-                        className="flex items-center gap-2 bg-[#0f4c35] hover:bg-[#0a3325] text-white text-xs font-black px-4 py-2.5 rounded-xl uppercase tracking-widest transition-all disabled:opacity-50 w-full justify-center"
-                    >
-                        {seansLoading ? <Loader2 size={13} className="animate-spin" /> : <CheckSquare size={13} />}
-                        Seans Verdim
-                    </button>
+                    <div className="space-y-2">
+                        {!seans.tarih && (
+                            <p className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-3 py-2 rounded-xl flex items-center gap-1.5">
+                                <AlertCircle size={11} /> Seans vermeden önce yukarıdan tarih belirlemeniz gerekiyor.
+                            </p>
+                        )}
+                        <button
+                            onClick={handleSeansVer}
+                            disabled={seansLoading || !seans.tarih}
+                            className={`flex items-center gap-2 text-xs font-black px-4 py-2.5 rounded-xl uppercase tracking-widest transition-all w-full justify-center ${
+                                !seans.tarih
+                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    : 'bg-[#0f4c35] hover:bg-[#0a3325] text-white shadow-md disabled:opacity-50'
+                            }`}
+                        >
+                            {seansLoading ? <Loader2 size={13} className="animate-spin" /> : <CheckSquare size={13} />}
+                            Seans Verdim
+                        </button>
+                    </div>
                 )
             )}
 
@@ -899,21 +927,21 @@ export default function UzmanRandevular() {
         ? randevular
         : randevular.filter(r => r.durum === filtre);
 
-    const bekleyenSayisi = randevular.filter(r => r.durum === 'beklemede').length;
-    const onGorusmeSayisi = randevular.filter(r => r.randevu_tipi === 'on_gorusme' && r.durum === 'onaylandi' && !r.kesin_tarih).length;
+    const bekleyenSayisi = randevular.filter(r => r.durum === 'beklemede' && r.randevu_tipi !== 'on_gorusme').length;
+    const onGorusmeSayisi = randevular.filter(r => r.randevu_tipi === 'on_gorusme' && !r.kesin_tarih && r.durum !== 'tamamlandi' && r.durum !== 'iptal').length;
 
     return (
-        <div className="bg-[#f0fdf4] min-h-screen py-12 px-4 md:px-8">
-            <div className="max-w-3xl mx-auto space-y-8 pb-20">
+        <div className="bg-[#f0fdf4] min-h-screen py-6 sm:py-10 md:py-12 px-3 sm:px-5 md:px-8">
+            <div className="max-w-3xl mx-auto space-y-5 sm:space-y-7 md:space-y-8 pb-28 lg:pb-8">
                 {/* Header */}
                 <div>
-                    <span className="inline-block text-[#16a34a] text-xs font-bold uppercase tracking-widest bg-[#dcfce7] px-4 py-2 rounded-full mb-3">
+                    <span className="inline-block text-[#16a34a] text-[10px] sm:text-xs font-bold uppercase tracking-widest bg-[#dcfce7] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full mb-2 sm:mb-3">
                         Randevu Yönetimi
                     </span>
-                    <h1 className="text-3xl md:text-5xl font-black text-[#0a2e1a] leading-tight">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#0a2e1a] leading-tight">
                         Randevularım
                     </h1>
-                    <p className="text-gray-500 font-medium mt-3 text-sm max-w-md">
+                    <p className="text-gray-500 font-medium mt-2 sm:mt-3 text-sm max-w-md">
                         Hastalarınızdan gelen randevu taleplerini inceleyin ve yönetin.
                     </p>
                 </div>

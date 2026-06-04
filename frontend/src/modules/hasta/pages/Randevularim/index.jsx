@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { getHastaRandevular, hastaKarar } from '../../services/randevuService';
 import { getHastaTedaviPlani, uploadDekont, hastaSeansAl, getHastaSeanslari, hastaSeansOnay } from '../../services/hastaService';
+import ReviewModal from '../../components/ReviewModal';
 
 const DURUM_CONFIG = {
     beklemede:  { label: 'Beklemede',   color: 'bg-amber-100 text-amber-700',  dot: 'bg-amber-400' },
@@ -274,10 +275,12 @@ function RandevuCard({ randevu, onUpdate }) {
     const [loading, setLoading] = useState(false);
     const [showSeansOnay, setShowSeansOnay] = useState(false);
     const [seansLoading, setSeansLoading] = useState(false);
+    const [showReviewModal, setShowReviewModal] = useState(false);
 
-    const durum = DURUM_CONFIG[randevu.durum] || DURUM_CONFIG.beklemede;
-    const tur = TUR_CONFIG[randevu.talep_turu] || {};
     const isOnGorusme = randevu.randevu_tipi === 'on_gorusme';
+    const effectiveDurum = isOnGorusme && randevu.durum === 'beklemede' ? 'onaylandi' : randevu.durum;
+    const durum = DURUM_CONFIG[effectiveDurum] || DURUM_CONFIG.beklemede;
+    const tur = TUR_CONFIG[randevu.talep_turu] || {};
     const tarih = randevu.talep_tarihi ? new Date(randevu.talep_tarihi) : null;
     const kesinTarih = randevu.kesin_tarih ? new Date(randevu.kesin_tarih) : null;
 
@@ -286,7 +289,7 @@ function RandevuCard({ randevu, onUpdate }) {
     const alternatifTarih = hasAlternatif ? new Date(randevu.alternatif_tarih) : null;
 
     // Seans aldım butonu: onaylı randevularda ve henüz onaylanmamışsa göster
-    const showSeansAl = randevu.durum === 'onaylandi' && !randevu.hasta_seans_onayladi;
+    const showSeansAl = effectiveDurum === 'onaylandi' && !randevu.hasta_seans_onayladi;
     const seansAlindi = !!randevu.hasta_seans_onayladi;
 
     const handleKarar = async (karar) => {
@@ -320,6 +323,14 @@ function RandevuCard({ randevu, onUpdate }) {
             <SeansAlimOnayModal
                 onConfirm={handleSeansAl}
                 onCancel={() => setShowSeansOnay(false)}
+            />
+        )}
+        {showReviewModal && (
+            <ReviewModal
+                isOpen={showReviewModal}
+                onClose={() => setShowReviewModal(false)}
+                uzmanId={randevu.uzman_user_id}
+                onSuccess={onUpdate}
             />
         )}
         <motion.div
@@ -450,12 +461,12 @@ function RandevuCard({ randevu, onUpdate }) {
 
                             {/* Kesin tarih — uzman tarafından belirlendiyse */}
                             {kesinTarih && (
-                                <div className={`rounded-2xl p-4 border ${randevu.durum === 'onaylandi' ? 'bg-green-50 border-green-100' : 'bg-amber-50 border-amber-100'}`}>
-                                    <div className={`text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-1 ${randevu.durum === 'onaylandi' ? 'text-green-500' : 'text-amber-600'}`}>
+                                <div className={`rounded-2xl p-4 border ${effectiveDurum === 'onaylandi' ? 'bg-green-50 border-green-100' : 'bg-amber-50 border-amber-100'}`}>
+                                    <div className={`text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-1 ${effectiveDurum === 'onaylandi' ? 'text-green-500' : 'text-amber-600'}`}>
                                         <CheckCircle size={9} />
-                                        {randevu.durum === 'onaylandi' ? 'Onaylanan Randevu Tarihi' : 'Belirlenen Tarih (Admin Onayı Bekleniyor)'}
+                                        {effectiveDurum === 'onaylandi' ? 'Onaylanan Randevu Tarihi' : 'Belirlenen Tarih (Admin Onayı Bekleniyor)'}
                                     </div>
-                                    <p className={`text-sm font-bold ${randevu.durum === 'onaylandi' ? 'text-green-800' : 'text-amber-800'}`}>
+                                    <p className={`text-sm font-bold ${effectiveDurum === 'onaylandi' ? 'text-green-800' : 'text-amber-800'}`}>
                                         {kesinTarih.toLocaleDateString('tr-TR', {
                                             weekday: 'long', day: 'numeric',
                                             month: 'long', year: 'numeric'
@@ -561,6 +572,16 @@ function RandevuCard({ randevu, onUpdate }) {
                                 </div>
                             )}
 
+                            {/* Uzmanı Değerlendir */}
+                            {(seansAlindi || randevu.durum === 'tamamlandi') && randevu.uzman_user_id && (
+                                <button
+                                    onClick={() => setShowReviewModal(true)}
+                                    className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black py-3 rounded-2xl uppercase tracking-widest transition-colors"
+                                >
+                                    ★ Uzmanı Değerlendir
+                                </button>
+                            )}
+
                             {/* Oluşturuldu */}
                             <p className="text-[10px] text-gray-400 text-right font-semibold">
                                 Oluşturuldu: {new Date(randevu.created_at).toLocaleDateString('tr-TR')}
@@ -574,7 +595,7 @@ function RandevuCard({ randevu, onUpdate }) {
     );
 }
 
-function HastaSeansKarti({ seans, onRefresh }) {
+function HastaSeansKarti({ seans, onRefresh, onLastSeansCompleted }) {
     const [showOnay, setShowOnay] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -590,6 +611,10 @@ function HastaSeansKarti({ seans, onRefresh }) {
         try {
             await hastaSeansOnay(seans.id);
             onRefresh?.();
+            // Son seansı uzman da onaylamışsa → değerlendirme modalını aç
+            if (uzmanOnay && seans.seans_no === seans.seans_sayisi) {
+                onLastSeansCompleted?.(seans.uzman_user_id);
+            }
         } catch {
             alert('Hata oluştu, lütfen tekrar deneyin.');
         } finally {
@@ -679,6 +704,7 @@ export default function Randevularim() {
     const [tedaviPlanlari, setTedaviPlanlari] = useState([]);
     const [seanslar, setSeanslar] = useState([]);
     const [seanslarLoading, setSeanslarLoading] = useState(true);
+    const [reviewModal, setReviewModal] = useState({ open: false, uzmanId: null });
 
     useEffect(() => {
         fetchRandevular();
@@ -727,14 +753,41 @@ export default function Randevularim() {
         r => r.durum === 'reddedildi' && r.alternatif_tarih
     ).length;
 
+    // Tedavi planına göre grupla — tüm seanslar bittiyse review butonu göster
+    const planGroups = seanslar.reduce((acc, s) => {
+        if (!acc[s.tedavi_plani_id]) {
+            acc[s.tedavi_plani_id] = {
+                seanslar: [],
+                uzman_user_id: s.uzman_user_id,
+                uzman_unvan: s.uzman_unvan,
+                uzman_ad: s.uzman_ad,
+                uzman_soyad: s.uzman_soyad,
+                seans_sayisi: s.seans_sayisi,
+                already_reviewed: !!s.already_reviewed,
+            };
+        }
+        acc[s.tedavi_plani_id].seanslar.push(s);
+        return acc;
+    }, {});
+
     return (
-        <div className="max-w-2xl mx-auto space-y-6 pb-20">
+        <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6 pb-28 lg:pb-8">
+
+            {/* Review Modal — seanslar bittikten sonra */}
+            {reviewModal.open && (
+                <ReviewModal
+                    isOpen={reviewModal.open}
+                    onClose={() => setReviewModal({ open: false, uzmanId: null })}
+                    uzmanId={reviewModal.uzmanId}
+                    onSuccess={() => setReviewModal({ open: false, uzmanId: null })}
+                />
+            )}
 
             {/* Header */}
             <div>
-                <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic
-                    flex items-center gap-3">
-                    <Calendar className="text-blue-600" size={36} />
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tighter italic
+                    flex items-center gap-2 sm:gap-3">
+                    <Calendar className="text-blue-600" size={28} />
                     Randevularım
                 </h1>
                 <p className="text-slate-500 font-bold mt-1 uppercase tracking-widest text-[10px]">
@@ -771,11 +824,36 @@ export default function Randevularim() {
                             {[1, 2].map(i => <div key={i} className="h-20 bg-white rounded-2xl animate-pulse border border-gray-100" />)}
                         </div>
                     ) : (
-                        <div className="space-y-2">
-                            {seanslar.map(s => (
-                                <HastaSeansKarti key={s.id} seans={s} onRefresh={fetchSeanslar} />
-                            ))}
-                        </div>
+                        Object.entries(planGroups).map(([planId, group]) => {
+                            const allDone = group.seanslar.every(s => s.durum === 'tamamlandi');
+                            return (
+                                <div key={planId} className="space-y-2">
+                                    {group.seanslar.map(s => (
+                                        <HastaSeansKarti
+                                            key={s.id}
+                                            seans={s}
+                                            onRefresh={fetchSeanslar}
+                                            onLastSeansCompleted={(uzmanId) =>
+                                                setReviewModal({ open: true, uzmanId })
+                                            }
+                                        />
+                                    ))}
+                                    {allDone && !group.already_reviewed && group.uzman_user_id && (
+                                        <button
+                                            onClick={() => setReviewModal({ open: true, uzmanId: group.uzman_user_id })}
+                                            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black py-3 rounded-2xl uppercase tracking-widest transition-colors"
+                                        >
+                                            ★ {group.uzman_unvan} {group.uzman_ad} {group.uzman_soyad} — Değerlendir
+                                        </button>
+                                    )}
+                                    {allDone && group.already_reviewed && (
+                                        <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 border border-green-100 text-xs font-black py-3 rounded-2xl">
+                                            <CheckCircle size={14} /> Bu uzmanı zaten değerlendirdiniz
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })
                     )}
                 </div>
             )}

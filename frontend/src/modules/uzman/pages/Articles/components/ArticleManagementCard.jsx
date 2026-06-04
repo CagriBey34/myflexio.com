@@ -19,11 +19,11 @@ export default function ArticleManagementCard({ article, onDelete, onStatusChang
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="bg-white border border-gray-100 rounded-[2.5rem] p-6 md:p-8 hover:shadow-xl hover:shadow-green-900/5 hover:border-[#4ade80]/40 transition-all duration-300 group"
+      className="bg-white border border-gray-100 rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 md:p-8 hover:shadow-xl hover:shadow-green-900/5 hover:border-[#4ade80]/40 transition-all duration-300 group"
     >
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-8">
         {/* Görsel */}
-        <div className="w-full md:w-40 h-40 shrink-0 rounded-[2rem] overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
+        <div className="w-full sm:w-36 md:w-40 h-36 sm:h-40 shrink-0 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden bg-gray-50 border border-gray-100 flex items-center justify-center">
           {article.kapak_resmi_url ? (
             <img src={article.kapak_resmi_url} alt={article.baslik} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
           ) : (
@@ -33,12 +33,12 @@ export default function ArticleManagementCard({ article, onDelete, onStatusChang
 
         {/* İçerik */}
         <div className="flex-1 space-y-4">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
             <div className="space-y-2">
                 <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${config.color}`}>
                     {config.icon} {config.text}
                 </div>
-                <h3 className="text-2xl font-black text-[#0a2e1a] tracking-tight group-hover:text-[#16a34a] transition-colors">
+                <h3 className="text-xl sm:text-2xl font-black text-[#0a2e1a] tracking-tight group-hover:text-[#16a34a] transition-colors">
                     {article.baslik}
                 </h3>
             </div>

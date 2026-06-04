@@ -5,7 +5,7 @@ export default function DistributionCard({ distribution, total }) {
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="bg-white h-full rounded-[3rem] p-10 border border-slate-100 shadow-sm"
+      className="bg-white h-full rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-8 md:p-10 border border-slate-100 shadow-sm"
     >
       <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-8 italic">Puan Dağılım Analizi</h3>
       <div className="space-y-4">

@@ -8,6 +8,7 @@ import {
 import api from '../../../shared/services/api';
 import Button from '../../../shared/components/ui/Button';
 import Input from '../../../shared/components/ui/Input';
+import KVKKModal from '../../../shared/components/ui/KVKKModal';
 
 export default function UzmanRegister() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function UzmanRegister() {
   
   const [status, setStatus] = useState({ type: null, message: '' });
   const [loading, setLoading] = useState(false);
+  const [kvkkModalOpen, setKvkkModalOpen] = useState(false);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -80,7 +82,7 @@ export default function UzmanRegister() {
   };
 
   return (
-    <div className="w-full min-h-[calc(100dvh-80px)] flex items-center justify-center px-4 py-8 overflow-hidden relative bg-white font-sans">
+    <div className="w-full min-h-screen flex items-center justify-center px-4 py-10 overflow-hidden relative bg-white font-sans">
       
       {/* --- ARKA PLAN DEKORATİF BLURLAR --- */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -111,7 +113,7 @@ export default function UzmanRegister() {
       {/* --- FORM KAPSAYICI --- */}
       <motion.div 
         layout 
-        className="bg-white border border-gray-100 p-8 md:p-12 rounded-[3rem] shadow-2xl shadow-green-900/5 max-w-2xl w-full relative z-10"
+        className="bg-white border border-gray-100 p-5 sm:p-8 md:p-12 rounded-[2rem] sm:rounded-[3rem] shadow-2xl shadow-green-900/5 max-w-2xl w-full relative z-10"
       >
         
         {/* Step Indicator */}
@@ -125,7 +127,7 @@ export default function UzmanRegister() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#dcfce7] text-[#16a34a] mb-4">
             {step === 1 ? <User size={24} /> : <ShieldCheck size={24} />}
           </div>
-          <h2 className="text-3xl md:text-4xl font-black text-[#0a2e1a] tracking-tight mb-2">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0a2e1a] tracking-tight mb-2">
             {step === 1 ? 'Uzman Profili' : 'Belge & Güvenlik'}
           </h2>
           <p className="text-sm text-gray-500 font-medium">
@@ -137,12 +139,12 @@ export default function UzmanRegister() {
           <AnimatePresence mode="wait">
             {step === 1 ? (
               <motion.div key="u-step1" initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.3 }} className="space-y-5">
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                   <Input label="Ad" icon={User} value={formData.ad} onChange={(e) => setFormData({ ...formData, ad: e.target.value })} placeholder="Adınız" />
                   <Input label="Soyad" icon={User} value={formData.soyad} onChange={(e) => setFormData({ ...formData, soyad: e.target.value })} placeholder="Soyadınız" />
                 </div>
                 <Input label="E-posta" type="email" icon={Mail} value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="kurumsal@email.com" />
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                   <Input label="Telefon" type="tel" icon={Phone} value={formData.telefon} onChange={(e) => setFormData({ ...formData, telefon: e.target.value })} placeholder="05..." />
                   <div className="space-y-2">
                     <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest ml-1">Unvan *</label>
@@ -162,7 +164,7 @@ export default function UzmanRegister() {
               </motion.div>
             ) : (
               <motion.div key="u-step2" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} transition={{ duration: 0.3 }} className="space-y-5">
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                   <Input label="Şifre" type="password" icon={Lock} value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
                   <Input label="Şifre Tekrar" type="password" icon={Lock} value={formData.passwordConfirm} onChange={(e) => setFormData({ ...formData, passwordConfirm: e.target.value })} placeholder="••••••••" />
                 </div>
@@ -185,20 +187,40 @@ export default function UzmanRegister() {
 
                 {/* Onaylar */}
                 <div className="space-y-3 mt-4">
-                  {[
-                    { id: 'kvkk', label: 'KVKK Aydınlatma Metnini okudum ve onaylıyorum.', key: 'kvkk_onay' },
-                    { id: 'soz', label: 'Uzman Hizmet Sözleşmesini kabul ediyorum.', key: 'sozlesme_onay' }
-                  ].map(check => (
-                    <div key={check.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:border-[#4ade80]/40 transition-colors" onClick={() => setFormData({...formData, [check.key]: !formData[check.key]})}>
-                      <div className={`w-6 h-6 shrink-0 rounded-lg border-2 flex items-center justify-center transition-all ${formData[check.key] ? 'bg-[#16a34a] border-[#16a34a]' : 'border-gray-300 bg-white'}`}>
-                        {formData[check.key] && <CheckCircle2 size={16} className="text-white" />}
-                      </div>
-                      <span className="text-xs font-bold text-gray-600 leading-snug">{check.label}</span>
+                  {/* KVKK onayı */}
+                  <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-[#4ade80]/40 transition-colors">
+                    <div
+                      className={`w-6 h-6 shrink-0 rounded-lg border-2 flex items-center justify-center transition-all cursor-pointer mt-0.5 ${formData.kvkk_onay ? 'bg-[#16a34a] border-[#16a34a]' : 'border-gray-300 bg-white'}`}
+                      onClick={() => setFormData({...formData, kvkk_onay: !formData.kvkk_onay})}
+                    >
+                      {formData.kvkk_onay && <CheckCircle2 size={16} className="text-white" />}
                     </div>
-                  ))}
+                    <span className="text-xs font-bold text-gray-600 leading-snug">
+                      myflexio tarafından hazırlanan{' '}
+                      <button type="button" onClick={() => setKvkkModalOpen(true)} className="text-[#16a34a] underline underline-offset-2 hover:text-[#0a2e1a] transition-colors">
+                        KVKK Aydınlatma Metni
+                      </button>
+                      &apos;ni okudum. Mesleki verilerim dahil kişisel verilerimin platform üzerinden hizmet sunumu amacıyla işlenmesine açık rıza gösteriyorum.
+                    </span>
+                  </div>
+
+                  {/* Hizmet sözleşmesi onayı */}
+                  <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-pointer hover:border-[#4ade80]/40 transition-colors" onClick={() => setFormData({...formData, sozlesme_onay: !formData.sozlesme_onay})}>
+                    <div className={`w-6 h-6 shrink-0 rounded-lg border-2 flex items-center justify-center transition-all ${formData.sozlesme_onay ? 'bg-[#16a34a] border-[#16a34a]' : 'border-gray-300 bg-white'}`}>
+                      {formData.sozlesme_onay && <CheckCircle2 size={16} className="text-white" />}
+                    </div>
+                    <span className="text-xs font-bold text-gray-600 leading-snug">Uzman Hizmet Sözleşmesini okudum ve kabul ediyorum.</span>
+                  </div>
+
+                  <KVKKModal
+                    open={kvkkModalOpen}
+                    onClose={() => setKvkkModalOpen(false)}
+                    onAccept={() => setFormData({ ...formData, kvkk_onay: true })}
+                    tip="uzman"
+                  />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mt-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-8">
                   <button type="button" onClick={() => setStep(1)} className="flex items-center justify-center gap-2 text-sm font-black text-gray-400 py-4 hover:text-[#0a2e1a] transition-colors">
                     <ArrowLeft size={18} /> Geri
                   </button>

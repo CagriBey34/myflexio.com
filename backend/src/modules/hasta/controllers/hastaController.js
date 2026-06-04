@@ -715,11 +715,12 @@ export const createRandevu = async (req, res) => {
             }
         }
 
+        const initialDurum = isOnGorusme ? 'onaylandi' : 'beklemede';
         const [result] = await connection.execute(
             `INSERT INTO randevular
-             (hasta_profile_id, uzman_profile_id, talep_tarihi, talep_turu, hasta_notu, randevu_tipi)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            [hasta_profile_id, uzman[0].id, talep_tarihi || null, talep_turu, hasta_notu || null, randevu_tipi]
+             (hasta_profile_id, uzman_profile_id, talep_tarihi, talep_turu, hasta_notu, randevu_tipi, durum)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [hasta_profile_id, uzman[0].id, talep_tarihi || null, talep_turu, hasta_notu || null, randevu_tipi, initialDurum]
         );
 
         res.status(201).json({
@@ -797,7 +798,8 @@ export const getHastaRandevular = async (req, res) => {
             `SELECT r.*,
                     up.ad as uzman_ad, up.soyad as uzman_soyad,
                     up.unvan, up.profil_fotograf_url,
-                    up.uzmanlik_alani
+                    up.uzmanlik_alani,
+                    up.user_id as uzman_user_id
              FROM randevular r
              INNER JOIN uzman_profiles up ON r.uzman_profile_id = up.id
              WHERE r.hasta_profile_id = ?
@@ -1011,13 +1013,16 @@ export const getHastaSeanslari = async (req, res) => {
         const [seanslar] = await pool.execute(
             `SELECT s.*,
                     tp.tedavi_turu, tp.seans_sayisi, tp.toplam_ucret,
-                    up.ad AS uzman_ad, up.soyad AS uzman_soyad, up.unvan AS uzman_unvan
+                    up.ad AS uzman_ad, up.soyad AS uzman_soyad, up.unvan AS uzman_unvan,
+                    up.user_id AS uzman_user_id,
+                    CASE WHEN rv.id IS NOT NULL THEN 1 ELSE 0 END AS already_reviewed
              FROM seanslar s
              INNER JOIN tedavi_planlari tp ON s.tedavi_plani_id = tp.id
              INNER JOIN uzman_profiles up ON tp.uzman_profile_id = up.id
+             LEFT JOIN reviews rv ON rv.uzman_id = up.user_id AND rv.hasta_id = ?
              WHERE tp.hasta_profile_id = ? AND tp.durum = 'aktif'
              ORDER BY s.seans_no ASC`,
-            [hastaProfileId]
+            [req.user.id, hastaProfileId]
         );
         res.status(200).json({ success: true, data: seanslar });
     } catch (error) {

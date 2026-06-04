@@ -243,13 +243,13 @@ export default function UzmanBasvurular() {
     const bekleyenSayisi = statusFilter === 'pending_approval' ? total : null;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-5 md:space-y-6 pb-24 lg:pb-6">
 
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic flex items-center gap-3">
-                        <ShieldCheck className="text-blue-600" size={36} />
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tighter italic flex items-center gap-2 sm:gap-3">
+                        <ShieldCheck className="text-blue-600" size={26} />
                         Uzman Başvuruları
                     </h1>
                     <p className="text-slate-500 font-bold mt-1 uppercase tracking-widest text-[10px]">
@@ -285,7 +285,7 @@ export default function UzmanBasvurular() {
                     ))}
                 </div>
             ) : applications.length === 0 ? (
-                <div className="bg-white rounded-2xl border-2 border-slate-100 p-16 text-center">
+                <div className="bg-white rounded-2xl border-2 border-slate-100 p-8 sm:p-12 md:p-16 text-center">
                     <XCircle className="mx-auto mb-3 text-slate-200" size={48} />
                     <p className="font-black text-slate-400 uppercase tracking-widest text-xs">
                         Başvuru bulunamadı

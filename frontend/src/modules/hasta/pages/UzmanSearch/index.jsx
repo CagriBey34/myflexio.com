@@ -41,11 +41,11 @@ export default function UzmanSearch() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-20">
+    <div className="max-w-7xl mx-auto space-y-5 sm:space-y-6 md:space-y-8 pb-28 lg:pb-8">
       {/* --- HEADER --- */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6">
         <div>
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter italic flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter italic flex items-center gap-2 sm:gap-3">
              Uzman Keşfet
           </h1>
           <p className="text-slate-500 font-bold mt-1 uppercase tracking-widest text-[10px]">
@@ -83,7 +83,7 @@ export default function UzmanSearch() {
             </div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">Akıllı Eşleşmeler</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {recommended.map((uzman) => (
               <UzmanCard key={uzman.id} uzman={uzman} isRecommended />
             ))}
@@ -100,7 +100,7 @@ export default function UzmanSearch() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="h-64 bg-white border border-slate-100 rounded-[2.5rem] animate-pulse" />
             ))}
@@ -108,7 +108,7 @@ export default function UzmanSearch() {
         ) : uzmanlar.length === 0 ? (
           <EmptyState onClear={() => setFilters({ unvan: '', sehir: '', ilce: '', minRating: 0, sort: 'recommended' })} />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {uzmanlar.map((uzman) => (
               <UzmanCard key={uzman.id} uzman={uzman} />
             ))}

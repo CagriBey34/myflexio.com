@@ -1,9 +1,11 @@
 import { FileText, ExternalLink } from 'lucide-react';
 
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/api$/, '');
+
 export default function MedicalReportsCard({ reports }) {
   return (
-    <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl">
-      <h2 className="text-xl font-black mb-8 uppercase tracking-tighter flex items-center gap-3">
+    <div className="bg-slate-900 rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 md:p-8 text-white shadow-2xl">
+      <h2 className="text-xl font-black mb-5 sm:mb-8 uppercase tracking-tighter flex items-center gap-3">
         <FileText className="text-blue-400" size={24} /> Tıbbi Raporlar
       </h2>
       {reports.length > 0 ? (
@@ -22,7 +24,7 @@ export default function MedicalReportsCard({ reports }) {
                 </div>
               </div>
               <a
-                href={`http://localhost:3000${report.dosya_url}`}
+                href={`${API_BASE}${report.dosya_url}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 bg-slate-700 text-slate-300 hover:text-white hover:bg-blue-600 rounded-xl transition-all"

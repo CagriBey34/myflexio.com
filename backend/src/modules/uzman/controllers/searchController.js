@@ -234,10 +234,7 @@ export const getUzmanProfile = async (req, res) => {
             avgRating: Math.round(avgRating * 10) / 10,
             totalReviews: reviews.length,
             distribution,
-            reviews: reviews.map(r => ({
-                ...r,
-                hastaAd: `${r.hastaAd} ${r.hastaSoyad.charAt(0)}.`
-            }))
+            reviews
         };
 
         res.status(200).json({
@@ -261,6 +258,13 @@ export const createReview = async (req, res) => {
     try {
         const hastaId = req.user.id;
         const { uzmanId, rating, comment } = req.body;
+
+        if (!uzmanId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Uzman bilgisi eksik'
+            });
+        }
 
         if (!rating || rating < 1 || rating > 5) {
             return res.status(400).json({

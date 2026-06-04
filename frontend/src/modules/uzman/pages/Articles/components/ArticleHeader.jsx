@@ -8,7 +8,7 @@ export default function ArticleHeader({ onNew }) {
         <span className="inline-block text-[#16a34a] text-xs font-bold uppercase tracking-widest bg-[#dcfce7] px-4 py-2 rounded-full mb-3">
             İçeriklerinizi Yönetin
         </span>
-        <h1 className="text-4xl md:text-5xl font-black text-[#0a2e1a] leading-tight">Makalelerim</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#0a2e1a] leading-tight">Makalelerim</h1>
       </div>
       <Button 
         onClick={onNew}

@@ -377,8 +377,8 @@ function RandevuRow({ randevu, onUpdate }) {
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
                                     <Video size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Ücretsiz Ön Görüşme Talebi — 15 Dakika</p>
-                                        <p className="text-xs text-blue-700">Hasta tarih/saat seçmedi. Onayladıktan sonra uzman kendi panelinden kesin tarihi belirleyecektir.</p>
+                                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Ücretsiz Ön Görüşme — Otomatik Onaylı</p>
+                                        <p className="text-xs text-blue-700">Bu randevu hasta ile uzman arasında gerçekleşir. Admin onayı gerekmez; uzman kendi panelinden kesin tarihi belirleyecektir.</p>
                                     </div>
                                 </div>
                             )}
@@ -478,8 +478,8 @@ function RandevuRow({ randevu, onUpdate }) {
                                 </div>
                             )}
 
-                            {/* Aksiyon butonları — sadece beklemede ise */}
-                            {randevu.durum === 'beklemede' && (
+                            {/* Aksiyon butonları — sadece beklemede ve ön görüşme değilse */}
+                            {randevu.durum === 'beklemede' && !isOnGorusme && (
                                 <div className="flex flex-wrap gap-3">
                                     {!showRedInput ? (
                                         <>
@@ -769,18 +769,18 @@ export default function AdminRandevular() {
     const bekleyenSayisi = aktifDurum === 'beklemede' ? total : null;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-5 md:space-y-6 pb-24 lg:pb-6">
             {/* Sistem IBAN Yönetimi */}
             <SistemIbanSection />
 
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                        <Calendar className="text-blue-600" size={32} />
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
+                        <Calendar className="text-blue-600 flex-shrink-0" size={26} />
                         Randevular
                     </h1>
-                    <p className="text-gray-500 mt-1 text-sm">
+                    <p className="text-gray-500 mt-1 text-xs sm:text-sm">
                         Hasta randevu ve ön görüşme taleplerini buradan yönetin
                     </p>
                 </div>
@@ -817,7 +817,7 @@ export default function AdminRandevular() {
                     ))}
                 </div>
             ) : randevular.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
+                <div className="bg-white rounded-2xl border border-gray-100 p-8 sm:p-12 md:p-16 text-center">
                     <Calendar className="mx-auto mb-3 text-gray-200" size={48} />
                     <p className="font-bold text-gray-400">Bu kategoride randevu yok</p>
                 </div>

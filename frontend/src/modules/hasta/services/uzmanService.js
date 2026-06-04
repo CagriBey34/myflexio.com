@@ -10,6 +10,11 @@ export const getUzmanProfile = async (id) => {
     return response.data;
 };
 
+export const getUzmanReviews = async (uzmanId) => {
+    const response = await api.get(`/uzman/${uzmanId}/reviews`);
+    return response.data;
+};
+
 export const createReview = async (reviewData) => {
     const response = await api.post('/hasta/reviews', reviewData);
     return response.data;

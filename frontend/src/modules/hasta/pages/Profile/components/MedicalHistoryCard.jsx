@@ -8,8 +8,8 @@ export default function MedicalHistoryCard({ profile }) {
   ];
 
   return (
-    <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
-      <h2 className="text-xl font-black text-slate-900 mb-8 uppercase tracking-tighter flex items-center gap-3">
+    <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 md:p-8 border border-slate-100 shadow-sm">
+      <h2 className="text-xl font-black text-slate-900 mb-5 sm:mb-8 uppercase tracking-tighter flex items-center gap-3">
         <FileText className="text-blue-600" size={24} /> Tıbbi Geçmiş
       </h2>
       <div className="space-y-4">

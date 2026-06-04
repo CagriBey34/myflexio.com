@@ -48,12 +48,12 @@ export default function HastaProfile() {
   const isProfileComplete = profile?.profile_completed_at;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12">
-      
+    <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 md:space-y-8 pb-28 lg:pb-8">
+
       {/* --- HEADER --- */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic">Profil Detaylarım</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tighter italic">Profil Detaylarım</h1>
           <p className="text-slate-500 font-bold mt-1 uppercase tracking-widest text-[10px]">
             Sağlık Verileriniz ve Kişisel Bilgileriniz
           </p>
@@ -73,14 +73,14 @@ export default function HastaProfile() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-blue-600 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-blue-200 relative overflow-hidden"
+          className="bg-blue-600 rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 md:p-8 text-white shadow-2xl shadow-blue-200 relative overflow-hidden"
         >
           <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
             <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
               <ShieldAlert size={32} />
             </div>
             <div className="flex-1 text-center md:text-left">
-              <h3 className="text-2xl font-black tracking-tighter mb-1">Profiliniz Henüz Tamamlanmadı</h3>
+              <h3 className="text-xl sm:text-2xl font-black tracking-tighter mb-1">Profiliniz Henüz Tamamlanmadı</h3>
               <p className="text-blue-100 font-bold opacity-80">Uzman eşleşmesi ve randevular için eksik bilgileri tamamlayın.</p>
             </div>
             <Button
@@ -94,15 +94,15 @@ export default function HastaProfile() {
       )}
 
       {/* --- GRID LAYOUT --- */}
-      <div className="grid lg:grid-cols-12 gap-8">
+      <div className="grid lg:grid-cols-12 gap-4 sm:gap-5 md:gap-6 lg:gap-8">
         {/* Sol Sütun: Temel & Tedavi */}
-        <div className="lg:col-span-7 space-y-8">
+        <div className="lg:col-span-7 space-y-4 sm:space-y-6 md:space-y-8">
           <BasicInfoCard profile={profile} />
           {isProfileComplete && <TreatmentCard profile={profile} />}
         </div>
 
         {/* Sağ Sütun: Tıbbi Geçmiş & Raporlar */}
-        <div className="lg:col-span-5 space-y-8">
+        <div className="lg:col-span-5 space-y-4 sm:space-y-6 md:space-y-8">
           {isProfileComplete && (
             <>
               <MedicalHistoryCard profile={profile} />

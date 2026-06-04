@@ -4,7 +4,7 @@ export default function ReviewHeader() {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
       <div>
-        <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic flex items-center gap-3">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tighter italic flex items-center gap-3">
            Hasta Değerlendirmeleri
         </h1>
         <p className="text-slate-500 font-bold mt-1 uppercase tracking-widest text-[10px]">

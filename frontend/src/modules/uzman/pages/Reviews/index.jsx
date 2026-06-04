@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, HeartPulse } from 'lucide-react';
-import { getUzmanReviews } from '../../services/uzmanService';
+import { getOwnReviews } from '../../services/uzmanService';
 
 // Alt Bileşenler
 import ReviewHeader from './components/ReviewHeader';
@@ -22,7 +22,7 @@ export default function UzmanReviews() {
 
   const fetchReviews = async () => {
     try {
-      const response = await getUzmanReviews();
+      const response = await getOwnReviews();
       setStats(response.data.stats);
       setReviews(response.data.reviews);
     } catch (error) {
@@ -42,12 +42,12 @@ export default function UzmanReviews() {
   }
 
   return (
-    <div className="bg-[#f0fdf4] min-h-screen py-12 px-4 md:px-8">
-        <div className="max-w-6xl mx-auto space-y-8 pb-20">
+    <div className="bg-[#f0fdf4] min-h-screen py-6 sm:py-10 md:py-12 px-3 sm:px-5 md:px-8">
+        <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6 md:space-y-8 pb-28 lg:pb-8">
           <ReviewHeader />
 
           {/* --- STATS SECTION (BENTO) --- */}
-          <div className="grid lg:grid-cols-12 gap-6">
+          <div className="grid lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             <div className="lg:col-span-4">
                 <RatingStatsCard avgRating={stats.avgRating} total={stats.totalReviews} />
             </div>

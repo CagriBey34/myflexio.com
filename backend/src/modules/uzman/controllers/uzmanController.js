@@ -302,6 +302,24 @@ export const getProfile = async (req, res) => {
         );
         profile.makaleler = makaleler;
 
+        // Reviews
+        const [reviews] = await pool.execute(
+            `SELECT r.id, r.rating, r.comment, r.created_at,
+                    hp.ad as hastaAd, hp.soyad as hastaSoyad
+             FROM reviews r
+             INNER JOIN users u ON r.hasta_id = u.id
+             INNER JOIN hasta_profiles hp ON u.id = hp.user_id
+             WHERE r.uzman_id = ?
+             ORDER BY r.created_at DESC`,
+            [userId]
+        );
+        const avgRating = reviews.length > 0
+            ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+            : 0;
+        profile.avgRating = Math.round(avgRating * 10) / 10;
+        profile.totalReviews = reviews.length;
+        profile.reviews = reviews;
+
         res.status(200).json({
             success: true,
             data: profile
@@ -349,15 +367,15 @@ export const getUzmanRandevular = async (req, res) => {
                     hp.ilac_listesi as hasta_ilac_listesi,
                     hp.alerjiler as hasta_alerjiler,
                     u.email as hasta_email,
-                    CASE WHEN tp.id IS NOT NULL THEN 1 ELSE 0 END as eslesme_var
+                    (SELECT COUNT(*) FROM tedavi_planlari
+                     WHERE uzman_profile_id = r.uzman_profile_id
+                       AND hasta_profile_id = r.hasta_profile_id
+                       AND durum = 'aktif') > 0 as eslesme_var,
+                    (SELECT COUNT(*) FROM tedavi_planlari
+                     WHERE randevu_id = r.id) > 0 as plan_gonderildi
              FROM randevular r
              INNER JOIN hasta_profiles hp ON r.hasta_profile_id = hp.id
              INNER JOIN users u ON hp.user_id = u.id
-             LEFT JOIN tedavi_planlari tp ON (
-                 tp.uzman_profile_id = r.uzman_profile_id
-                 AND tp.hasta_profile_id = r.hasta_profile_id
-                 AND tp.durum = 'aktif'
-             )
              WHERE r.uzman_profile_id = ?
              ORDER BY r.created_at DESC`,
             [uzman_profile_id]
@@ -410,11 +428,15 @@ export const setKesinTarih = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Randevu bulunamadı veya güncellenemez' });
         }
 
+        const yeniDurum = randevu.randevu_tipi === 'on_gorusme' ? 'onaylandi' : null;
+
         const [result] = await pool.execute(
             `UPDATE randevular
-             SET kesin_tarih = ?
+             SET kesin_tarih = ?${yeniDurum ? ', durum = ?' : ''}
              WHERE id = ? AND uzman_profile_id = ? AND durum IN ('beklemede', 'onaylandi')`,
-            [kesin_tarih, id, uzman_profile_id]
+            yeniDurum
+                ? [kesin_tarih, yeniDurum, id, uzman_profile_id]
+                : [kesin_tarih, id, uzman_profile_id]
         );
 
         if (result.affectedRows === 0) {

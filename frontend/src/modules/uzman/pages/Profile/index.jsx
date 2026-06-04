@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Edit, MapPin, GraduationCap, Award, Star,
-  FileText, Calendar, ShieldCheck, ExternalLink, Activity, User, ArrowRight, HeartPulse,
-  CreditCard, Check, X
+  FileText, Calendar, ShieldCheck, ExternalLink, Activity, User, HeartPulse,
+  CreditCard, Check, X, MessageSquare, Quote
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getProfile, updateIban } from '../../services/uzmanService';
@@ -67,16 +67,16 @@ export default function UzmanProfileView() {
   }
 
   return (
-    <div className="bg-[#f0fdf4] min-h-screen py-12 px-4 md:px-8">
-      <div className="max-w-6xl mx-auto space-y-8 pb-12">
-        
+    <div className="bg-[#f0fdf4] min-h-screen py-6 sm:py-10 md:py-12 px-3 sm:px-5 md:px-8">
+      <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6 md:space-y-8 pb-28 lg:pb-8">
+
         {/* --- HEADER: ACTION BAR --- */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
           <div>
-            <span className="inline-block text-[#16a34a] text-xs font-bold uppercase tracking-widest bg-[#dcfce7] px-4 py-2 rounded-full mb-3">
+            <span className="inline-block text-[#16a34a] text-[10px] sm:text-xs font-bold uppercase tracking-widest bg-[#dcfce7] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full mb-2 sm:mb-3">
               Platformdaki Görünümünüz
             </span>
-            <h1 className="text-4xl md:text-5xl font-black text-[#0a2e1a] leading-tight">Profilim</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#0a2e1a] leading-tight">Profilim</h1>
           </div>
           <Button 
             onClick={() => navigate('/uzman/profile/edit')}
@@ -91,23 +91,22 @@ export default function UzmanProfileView() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white rounded-[3rem] shadow-xl shadow-green-900/5 border border-gray-100 p-8 md:p-12 relative overflow-hidden"
+          className="bg-white rounded-[2rem] sm:rounded-[3rem] shadow-xl shadow-green-900/5 border border-gray-100 p-5 sm:p-8 md:p-10 lg:p-12 relative overflow-hidden"
         >
-          {/* Arka Plan Dekorasyonu */}
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#4ade80] rounded-full blur-[120px] opacity-10 pointer-events-none" />
 
-          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-10 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 sm:gap-8 lg:gap-10 relative z-10">
             {/* Profile Photo Section */}
             <div className="relative group shrink-0">
               {profile.profil_fotograf_url ? (
                 <img
                   src={profile.profil_fotograf_url}
                   alt={`${profile.ad} ${profile.soyad}`}
-                  className="w-48 h-48 rounded-[2.5rem] object-cover shadow-xl ring-8 ring-[#dcfce7] group-hover:scale-105 transition-transform duration-500 bg-white"
+                  className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-[2rem] object-cover shadow-xl ring-4 sm:ring-8 ring-[#dcfce7] group-hover:scale-105 transition-transform duration-500 bg-white"
                 />
               ) : (
-                <div className="w-48 h-48 rounded-[2.5rem] bg-gradient-to-br from-[#0f4c35] to-[#1a6b4a] flex items-center justify-center shadow-xl ring-8 ring-[#dcfce7] group-hover:scale-105 transition-transform duration-500">
-                  <span className="text-6xl font-black text-white tracking-tighter">
+                <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-[2rem] bg-gradient-to-br from-[#0f4c35] to-[#1a6b4a] flex items-center justify-center shadow-xl ring-4 sm:ring-8 ring-[#dcfce7] group-hover:scale-105 transition-transform duration-500">
+                  <span className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tighter">
                     {profile.ad?.[0]}{profile.soyad?.[0]}
                   </span>
                 </div>
@@ -121,7 +120,7 @@ export default function UzmanProfileView() {
             {/* Info & Stats Section */}
             <div className="flex-1 text-center lg:text-left space-y-6 pt-2">
               <div>
-                  <h2 className="text-4xl md:text-5xl font-black text-[#0a2e1a] mb-3 tracking-tighter">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#0a2e1a] mb-2 sm:mb-3 tracking-tighter">
                     {profile.ad} {profile.soyad}
                   </h2>
                   <div className="inline-flex items-center gap-2 bg-[#dcfce7] text-[#16a34a] px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest">
@@ -130,16 +129,15 @@ export default function UzmanProfileView() {
               </div>
 
               {/* Quick Metrics */}
-              <div className="grid grid-cols-3 gap-4 md:gap-6 max-w-2xl mx-auto lg:mx-0">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 lg:gap-6 max-w-2xl mx-auto lg:mx-0">
                 {[
                   { icon: <Star size={18} fill="currentColor"/>, val: profile.avgRating?.toFixed(1) || '0.0', label: 'Puan', color: 'text-[#fbbf24]' },
                   { icon: <User size={18}/>, val: profile.totalReviews || 0, label: 'Yorum', color: 'text-[#0ea5e9]' },
-                  { icon: <FileText size={18}/>, val: profile.makaleler?.length || profile.totalArticles || 0, label: 'Makale', color: 'text-[#16a34a]' },
                 ].map((stat, i) => (
-                  <div key={i} className="bg-gray-50 border border-gray-100 p-5 rounded-[2rem] group hover:border-[#4ade80]/40 hover:bg-white hover:shadow-lg transition-all duration-300">
-                    <div className={`flex items-center justify-center gap-2 mb-2 ${stat.color}`}>
+                  <div key={i} className="bg-gray-50 border border-gray-100 p-3 sm:p-4 md:p-5 rounded-[1.5rem] sm:rounded-[2rem] group hover:border-[#4ade80]/40 hover:bg-white hover:shadow-lg transition-all duration-300">
+                    <div className={`flex items-center justify-center gap-1 sm:gap-2 mb-1 sm:mb-2 ${stat.color}`}>
                       {stat.icon}
-                      <span className="text-2xl md:text-3xl font-black text-[#0a2e1a]">{stat.val}</span>
+                      <span className="text-lg sm:text-2xl md:text-3xl font-black text-[#0a2e1a]">{stat.val}</span>
                     </div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">{stat.label}</p>
                   </div>
@@ -237,41 +235,6 @@ export default function UzmanProfileView() {
               </motion.div>
               )}
 
-              {/* Makalelerim */}
-              {profile.makaleler && profile.makaleler.length > 0 && (
-              <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="bg-white rounded-[2.5rem] p-8 md:p-10 border border-gray-100 shadow-sm"
-              >
-                  <h2 className="text-xl font-black text-[#0a2e1a] mb-6 flex items-center gap-3">
-                      <FileText className="text-[#4ade80]" size={24}/> 
-                      Makalelerim
-                  </h2>
-                  <div className="space-y-4">
-                      {profile.makaleler.map((makale) => (
-                          <div
-                              key={makale.id}
-                              onClick={() => navigate(`/articles/${makale.id}`)}
-                              className="group flex items-center justify-between p-6 bg-gray-50 hover:bg-[#f0fdf4] border border-gray-100 hover:border-[#4ade80]/40 rounded-3xl cursor-pointer transition-all duration-300"
-                          >
-                              <div className="flex-1 min-w-0 pr-4">
-                                  <p className="font-black text-[#0a2e1a] text-base truncate group-hover:text-[#16a34a] transition-colors">
-                                      {makale.baslik}
-                                  </p>
-                                  <p className="text-xs font-bold text-gray-400 mt-2">
-                                      {new Date(makale.created_at).toLocaleDateString('tr-TR')}
-                                  </p>
-                              </div>
-                              <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-gray-100 group-hover:border-[#4ade80] group-hover:bg-[#4ade80] transition-colors shrink-0">
-                                <ArrowRight size={18} className="text-gray-400 group-hover:text-[#0a2e1a] transition-colors" />
-                              </div>
-                          </div>
-                      ))}
-                  </div>
-              </motion.div>
-              )}
           </div>
 
           {/* RIGHT: IBAN + CERTIFICATES */}
@@ -354,6 +317,62 @@ export default function UzmanProfileView() {
               )}
           </div>
         </div>
+
+        {/* Reviews */}
+        {profile.reviews?.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white rounded-[2.5rem] p-8 md:p-10 border border-gray-100 shadow-sm"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-black text-[#0a2e1a] flex items-center gap-3">
+                <MessageSquare className="text-[#4ade80]" size={24} />
+                Hasta Değerlendirmeleri
+              </h2>
+              <div className="flex items-center gap-2 bg-[#dcfce7] px-4 py-2 rounded-full">
+                <Star size={15} className="text-[#fbbf24]" fill="currentColor" />
+                <span className="font-black text-[#0a2e1a] text-sm">{profile.avgRating?.toFixed(1)}</span>
+                <span className="text-[#16a34a] text-xs font-bold">({profile.totalReviews} yorum)</span>
+              </div>
+            </div>
+            <div className="space-y-4">
+              {profile.reviews.map((review) => {
+                const anonymize = (str) => str ? str[0] + '*'.repeat(Math.max(str.length - 1, 1)) : '?';
+                return (
+                  <div key={review.id} className="bg-[#f0fdf4] rounded-[1.5rem] p-5 border border-green-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-[#0f4c35] flex items-center justify-center text-white text-xs font-black">
+                          {review.hastaAd?.[0] || '?'}
+                        </div>
+                        <span className="text-sm font-black text-[#0a2e1a]">
+                          {anonymize(review.hastaAd)} {anonymize(review.hastaSoyad)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {[1,2,3,4,5].map(s => (
+                          <Star key={s} size={13} className={s <= review.rating ? 'text-[#fbbf24]' : 'text-gray-200'} fill={s <= review.rating ? 'currentColor' : 'none'} />
+                        ))}
+                      </div>
+                    </div>
+                    {review.comment && (
+                      <div className="flex gap-2">
+                        <Quote size={14} className="text-[#4ade80] flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-gray-600 italic leading-relaxed">{review.comment}</p>
+                      </div>
+                    )}
+                    <p className="text-[10px] text-gray-400 font-bold text-right mt-2">
+                      {new Date(review.created_at).toLocaleDateString('tr-TR')}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
       </div>
     </div>
   );

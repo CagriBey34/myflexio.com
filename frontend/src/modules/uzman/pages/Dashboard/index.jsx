@@ -48,7 +48,7 @@ export default function UzmanDashboard() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden bg-white border-2 border-amber-100 rounded-[2.5rem] p-8 shadow-xl shadow-amber-100/20"
+          className="relative overflow-hidden bg-white border-2 border-amber-100 rounded-[2rem] p-4 sm:p-6 md:p-8 shadow-xl shadow-amber-100/20"
         >
           <div className="absolute top-0 right-0 p-8 opacity-10">
             <Clock size={120} className="text-amber-500" />
@@ -79,7 +79,7 @@ export default function UzmanDashboard() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-blue-600 rounded-[2.5rem] p-8 md:p-10 text-white shadow-2xl shadow-blue-200 relative overflow-hidden group"
+          className="bg-blue-600 rounded-[2rem] p-4 sm:p-6 md:p-8 lg:p-10 text-white shadow-2xl shadow-blue-200 relative overflow-hidden group"
         >
           <div className="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-700">
             <Activity size={240} />
@@ -89,8 +89,8 @@ export default function UzmanDashboard() {
                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md"><AlertCircle size={20}/></div>
                <span className="font-black uppercase tracking-widest text-xs">Harekete Geç</span>
             </div>
-            <h3 className="text-3xl md:text-4xl font-black tracking-tighter mb-4">Harika Haber! Başvurunuz Onaylandı.</h3>
-            <p className="text-blue-100 font-medium text-lg max-w-2xl mb-8">
+            <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter mb-3">Harika Haber! Başvurunuz Onaylandı.</h3>
+            <p className="text-blue-100 font-medium text-sm sm:text-base lg:text-lg max-w-2xl mb-5 sm:mb-8">
               Sistemi aktif olarak kullanmaya ve hasta kabul etmeye başlamak için profil bilgilerinizi tamamlamanız gerekiyor.
             </p>
             <Button
@@ -127,15 +127,15 @@ export default function UzmanDashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      
-      {/* Header - Kişiselleştirilmiş Karşılama */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 md:space-y-8 pb-24 lg:pb-8">
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6">
         <div>
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter italic">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter italic">
             Merhaba, {profile?.ad} 👋
           </h1>
-          <p className="text-slate-500 font-bold mt-1 uppercase tracking-widest text-xs">
+          <p className="text-slate-500 font-bold mt-1 uppercase tracking-widest text-[10px]">
             {profile?.unvan} | MyFlexio Uzman Paneli
           </p>
         </div>
@@ -155,16 +155,16 @@ export default function UzmanDashboard() {
 
       {/* --- QUICK STATS (BENTO STYLE) --- */}
       {profile?.status === 'active' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
           {[
-            { label: 'Toplam Hasta', val: '0', icon: <Users size={24}/>, color: 'blue' },
-            { label: 'Randevular', val: '0', icon: <Calendar size={24}/>, color: 'indigo' },
-            { label: 'Makaleler', val: '0', icon: <FileText size={24}/>, color: 'emerald' },
+            { label: 'Toplam Hasta', val: '0', icon: <Users size={22}/>, color: 'blue' },
+            { label: 'Randevular', val: '0', icon: <Calendar size={22}/>, color: 'indigo' },
+            { label: 'Makaleler', val: '0', icon: <FileText size={22}/>, color: 'emerald' },
           ].map((stat, i) => (
             <motion.div
               key={i}
-              whileHover={{ y: -5 }}
-              className="bg-white border border-slate-100 p-6 rounded-[2rem] shadow-sm flex items-center gap-5"
+              whileHover={{ y: -3 }}
+              className="bg-white border border-slate-100 p-4 sm:p-5 rounded-[1.5rem] shadow-sm flex items-center gap-4"
             >
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-${stat.color}-50 text-${stat.color}-600`}>
                 {stat.icon}
@@ -179,15 +179,15 @@ export default function UzmanDashboard() {
       )}
 
       {/* --- ANA İÇERİK: PROFİL ÖZETİ (BENTO) --- */}
-      <div className="grid lg:grid-cols-12 gap-6">
-        
+      <div className="grid lg:grid-cols-12 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+
         {/* Sol Taraf: Profil Detayları */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="lg:col-span-8 bg-white border border-slate-100 rounded-[2.5rem] p-8 md:p-10 shadow-sm relative overflow-hidden"
+          className="lg:col-span-8 bg-white border border-slate-100 rounded-[2rem] p-4 sm:p-6 md:p-8 lg:p-10 shadow-sm relative overflow-hidden"
         >
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-5 sm:mb-8">
             <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                 <ShieldCheck className="text-blue-600" /> Profil Bilgileri
             </h2>
@@ -196,7 +196,7 @@ export default function UzmanDashboard() {
             )}
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
             <div className="flex gap-4">
               <div className="p-3 bg-slate-50 rounded-xl h-fit text-slate-400"><Mail size={20}/></div>
               <div>
@@ -237,7 +237,7 @@ export default function UzmanDashboard() {
            animate={{ opacity: 1, x: 0 }}
            className="lg:col-span-4 space-y-6"
         >
-            <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden group">
+            <div className="bg-slate-900 rounded-[2rem] p-4 sm:p-6 md:p-8 text-white relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-6 opacity-20">
                     <Activity size={80} />
                 </div>
@@ -260,9 +260,14 @@ export default function UzmanDashboard() {
             {/* Hızlı Yardım / Destek */}
             <div className="bg-white border border-slate-100 rounded-[2rem] p-6">
                 <p className="text-xs font-black text-slate-900 uppercase mb-4 tracking-tighter">Yardıma mı ihtiyacınız var?</p>
-                <button className="w-full py-3 bg-slate-50 rounded-xl text-slate-600 text-xs font-bold hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                <a
+                    href="https://wa.me/905464509274"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center w-full py-3 bg-slate-50 rounded-xl text-slate-600 text-xs font-bold hover:bg-green-50 hover:text-green-600 transition-colors"
+                >
                     Destek Merkezi'ne Bağlan
-                </button>
+                </a>
             </div>
         </motion.div>
 

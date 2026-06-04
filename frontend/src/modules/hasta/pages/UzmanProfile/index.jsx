@@ -3,10 +3,12 @@ import { motion } from 'framer-motion';
 import {
   MapPin, GraduationCap, Award, Star,
   FileText, Calendar, ShieldCheck, ExternalLink,
-  Activity, User, ChevronLeft, ArrowRight
+  Activity, User, ChevronLeft, MessageSquare, Quote
 } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { getUzmanProfile } from "../../services/uzmanService";
+
+const anonymize = str => str ? str[0] + '*'.repeat(Math.max(str.length - 1, 1)) : '?';
 import RandevuModal from '../../components/RandevuModal';
 import OnGorusmeModal from '../../components/OnGorusmeModal';
 
@@ -60,7 +62,7 @@ export default function HastaUzmanProfile() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12">
+    <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 md:space-y-8 pb-28 lg:pb-8">
 
       {/* Geri Butonu */}
       <button
@@ -74,23 +76,23 @@ export default function HastaUzmanProfile() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-[3rem] shadow-2xl shadow-blue-100/50 border border-slate-100 p-8 md:p-12 relative overflow-hidden"
+        className="bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl shadow-blue-100/50 border border-slate-100 p-4 sm:p-6 md:p-8 lg:p-12 relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none">
           <Activity size={300} className="text-blue-600" />
         </div>
 
-        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-10 relative z-10">
+        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 sm:gap-8 lg:gap-10 relative z-10">
           {/* Profil Fotoğrafı */}
           <div className="relative group">
             {profile.profil_fotograf_url ? (
               <img
                 src={profile.profil_fotograf_url}
                 alt={`${profile.ad} ${profile.soyad}`}
-                className="w-48 h-48 rounded-[2.5rem] object-cover shadow-2xl ring-8 ring-blue-50 group-hover:scale-105 transition-transform duration-500"
+                className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-[2rem] sm:rounded-[2.5rem] object-cover shadow-2xl ring-4 sm:ring-8 ring-blue-50 group-hover:scale-105 transition-transform duration-500"
               />
             ) : (
-              <div className="w-48 h-48 rounded-[2.5rem] bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-2xl ring-8 ring-blue-50">
+              <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-2xl ring-4 sm:ring-8 ring-blue-50">
                 <span className="text-6xl font-black text-white italic tracking-tighter">
                   {profile.ad?.[0]}{profile.soyad?.[0]}
                 </span>
@@ -105,7 +107,7 @@ export default function HastaUzmanProfile() {
           {/* Bilgiler */}
           <div className="flex-1 text-center lg:text-left space-y-6">
             <div>
-              <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-2 tracking-tighter">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 mb-2 tracking-tighter">
                 {profile.ad} {profile.soyad}
               </h2>
               <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-blue-100">
@@ -114,16 +116,15 @@ export default function HastaUzmanProfile() {
             </div>
 
             {/* Metrikler */}
-            <div className="grid grid-cols-3 gap-3 md:gap-6">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-6">
               {[
-                { icon: <Star size={18} fill="currentColor" />, val: profile.avgRating?.toFixed(1) || '0.0', label: 'Puan', color: 'text-yellow-500' },
-                { icon: <User size={18} />, val: profile.totalReviews || 0, label: 'Yorum', color: 'text-blue-600' },
-                { icon: <FileText size={18} />, val: profile.totalArticles || 0, label: 'Makale', color: 'text-indigo-600' },
+                { icon: <Star size={16} fill="currentColor" />, val: profile.reviews?.avgRating?.toFixed(1) || '0.0', label: 'Puan', color: 'text-yellow-500' },
+                { icon: <User size={16} />, val: profile.reviews?.totalReviews || 0, label: 'Yorum', color: 'text-blue-600' },
               ].map((stat, i) => (
-                <div key={i} className="bg-slate-50 border border-slate-100 p-4 rounded-3xl hover:bg-white hover:shadow-xl hover:shadow-slate-100 transition-all">
-                  <div className={`flex items-center justify-center gap-1.5 mb-1 ${stat.color}`}>
+                <div key={i} className="bg-slate-50 border border-slate-100 p-3 sm:p-4 rounded-2xl sm:rounded-3xl hover:bg-white hover:shadow-xl hover:shadow-slate-100 transition-all">
+                  <div className={`flex items-center justify-center gap-1 sm:gap-1.5 mb-1 ${stat.color}`}>
                     {stat.icon}
-                    <span className="text-xl md:text-2xl font-black text-slate-900">{stat.val}</span>
+                    <span className="text-lg sm:text-xl md:text-2xl font-black text-slate-900">{stat.val}</span>
                   </div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">{stat.label}</p>
                 </div>
@@ -178,16 +179,16 @@ export default function HastaUzmanProfile() {
         uzmanAd={`${profile.unvan || ''} ${profile.ad} ${profile.soyad}`}
       />
 
-      <div className="grid lg:grid-cols-12 gap-8">
+      <div className="grid lg:grid-cols-12 gap-4 sm:gap-5 md:gap-6 lg:gap-8">
         {/* SOL: Bio & Uzmanlık */}
-        <div className="lg:col-span-7 space-y-8">
+        <div className="lg:col-span-7 space-y-4 sm:space-y-6 md:space-y-8">
 
           {/* Hakkımda */}
           {profile.biyografi && (
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-[2.5rem] p-8 md:p-10 border border-slate-100 shadow-sm"
+              className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 md:p-8 lg:p-10 border border-slate-100 shadow-sm"
             >
               <h2 className="text-xl font-black text-slate-900 mb-6 uppercase tracking-tighter flex items-center gap-3">
                 <Activity className="text-blue-600" size={20} /> Hakkında
@@ -202,7 +203,7 @@ export default function HastaUzmanProfile() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-[2.5rem] p-8 md:p-10 border border-slate-100 shadow-sm"
+              className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 md:p-8 lg:p-10 border border-slate-100 shadow-sm"
             >
               <h2 className="text-xl font-black text-slate-900 mb-8 uppercase tracking-tighter flex items-center gap-3">
                 <Award className="text-blue-600" size={20} /> Uzmanlık Alanları
@@ -232,48 +233,16 @@ export default function HastaUzmanProfile() {
             </motion.div>
           )}
 
-          {/* Makaleler */}
-          {profile.makaleler && profile.makaleler.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-[2.5rem] p-8 md:p-10 border border-slate-100 shadow-sm"
-            >
-              <h2 className="text-xl font-black text-slate-900 mb-6 uppercase tracking-tighter flex items-center gap-3">
-                <FileText className="text-blue-600" size={20} /> Makaleleri
-              </h2>
-              <div className="space-y-4">
-                {profile.makaleler.map((makale) => (
-                  <div
-                    key={makale.id}
-                    onClick={() => navigate(`/articles/${makale.id}`)}
-                    className="group flex items-center justify-between p-5 bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 rounded-2xl cursor-pointer transition-all"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-black text-slate-900 text-sm truncate group-hover:text-blue-700 transition-colors">
-                        {makale.baslik}
-                      </p>
-                      <p className="text-xs text-slate-400 mt-1">
-                        {new Date(makale.created_at).toLocaleDateString('tr-TR')}
-                      </p>
-                    </div>
-                    <ArrowRight size={18} className="text-slate-300 group-hover:text-blue-600 transition-colors flex-shrink-0 ml-4" />
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
         </div>
 
         {/* SAĞ: Sertifikalar */}
-        <div className="lg:col-span-5 space-y-8">
+        <div className="lg:col-span-5 space-y-4 sm:space-y-6 md:space-y-8">
           {profile.sertifikalar && profile.sertifikalar.length > 0 && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-slate-900 rounded-[2.5rem] p-8 md:p-10 text-white shadow-2xl"
+              className="bg-slate-900 rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 md:p-8 lg:p-10 text-white shadow-2xl"
             >
               <h2 className="text-xl font-black mb-8 uppercase tracking-tighter flex items-center gap-3">
                 <FileText className="text-blue-400" size={20} /> Sertifikalar
@@ -308,6 +277,52 @@ export default function HastaUzmanProfile() {
           )}
         </div>
       </div>
+
+      {/* Değerlendirmeler */}
+      {profile.reviews?.reviews?.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 md:p-8 lg:p-10 border border-slate-100 shadow-sm"
+        >
+          <h2 className="text-xl font-black text-slate-900 mb-6 uppercase tracking-tighter flex items-center gap-3">
+            <MessageSquare className="text-blue-600" size={20} /> Hasta Değerlendirmeleri
+          </h2>
+          <div className="space-y-5">
+            {profile.reviews.reviews.map((review, i) => (
+              <div key={review.id || i} className="p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center font-black text-blue-700 text-sm">
+                    {anonymize(review.hastaAd)[0]}
+                  </div>
+                  <div>
+                    <p className="font-black text-slate-900 text-sm">
+                      {anonymize(review.hastaAd)} {anonymize(review.hastaSoyad)}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {[1,2,3,4,5].map(s => (
+                        <Star key={s} size={12} className={s <= review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-slate-200 fill-slate-200'} />
+                      ))}
+                      <span className="text-[10px] font-bold text-slate-400 ml-1">
+                        {new Date(review.created_at).toLocaleDateString('tr-TR')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                {review.comment && (
+                  <div className="relative pl-5">
+                    <Quote className="absolute top-0 left-0 text-blue-100" size={20} />
+                    <p className="text-sm text-slate-600 font-medium italic leading-relaxed">
+                      &ldquo;{review.comment}&rdquo;
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }

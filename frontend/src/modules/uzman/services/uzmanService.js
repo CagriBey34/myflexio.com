@@ -14,8 +14,8 @@ export const getProfile = async () => {
     return response.data;
 };
 
-export const getUzmanReviews = async (uzmanId) => {
-    const response = await api.get(`/uzman/${uzmanId}/reviews`);
+export const getOwnReviews = async () => {
+    const response = await api.get('/uzman/reviews');
     return response.data;
 };
 

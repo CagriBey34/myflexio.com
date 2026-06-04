@@ -373,8 +373,30 @@ export const getRandevular = async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const offset = (page - 1) * limit;
 
-        const whereClause = durum === 'hepsi' ? '' : 'WHERE r.durum = ?';
-        const params = durum === 'hepsi' ? [limit, offset] : [durum, limit, offset];
+        // Ön görüşmelerde kesin_tarih belirlenince durum otomatik onaylandi olur.
+        // Güvenlik katmanı: kesin_tarih verilmiş on_gorusme hiçbir zaman bekleyenlerde görünmez.
+        let whereClause, countWhere, params, countParams;
+        if (durum === 'hepsi') {
+            whereClause = '';
+            countWhere = '';
+            params = [limit, offset];
+            countParams = [];
+        } else if (durum === 'beklemede') {
+            whereClause = `WHERE r.durum = 'beklemede' AND NOT (r.randevu_tipi = 'on_gorusme' AND r.kesin_tarih IS NOT NULL)`;
+            countWhere = whereClause;
+            params = [limit, offset];
+            countParams = [];
+        } else if (durum === 'onaylandi') {
+            whereClause = `WHERE (r.durum = 'onaylandi') OR (r.durum = 'beklemede' AND r.randevu_tipi = 'on_gorusme' AND r.kesin_tarih IS NOT NULL)`;
+            countWhere = whereClause;
+            params = [limit, offset];
+            countParams = [];
+        } else {
+            whereClause = 'WHERE r.durum = ?';
+            countWhere = whereClause;
+            params = [durum, limit, offset];
+            countParams = [durum];
+        }
 
         const [randevular] = await pool.query(
             `SELECT
@@ -399,8 +421,8 @@ export const getRandevular = async (req, res) => {
         );
 
         const [countResult] = await pool.query(
-            `SELECT COUNT(*) as total FROM randevular r ${whereClause}`,
-            durum === 'hepsi' ? [] : [durum]
+            `SELECT COUNT(*) as total FROM randevular r ${countWhere}`,
+            countParams
         );
 
         res.status(200).json({

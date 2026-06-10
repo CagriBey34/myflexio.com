@@ -69,7 +69,7 @@ export async function sendEmail({ to, subject, html }) {
 
 // ─── Şablonlar ────────────────────────────────────────────────────────────────
 
-export function mailYeniRandevuUzman({ hastaAd, hastaSoyad, hastaEmail, hastaTelefon, talep_tarihi, talep_turu, randevu_tipi, hasta_notu }) {
+export function mailYeniRandevuUzman({ hastaAd, hastaSoyad, talep_tarihi, talep_turu, randevu_tipi, hasta_notu }) {
     const tip = randevu_tipi === 'on_gorusme' ? 'Ücretsiz Ön Görüşme' : 'Randevu';
     return {
         subject: `Yeni ${tip} Talebi — ${hastaAd} ${hastaSoyad}`,
@@ -77,8 +77,6 @@ export function mailYeniRandevuUzman({ hastaAd, hastaSoyad, hastaEmail, hastaTel
             <h3 style="margin:0 0 16px;color:${BRAND_COLOR}">Yeni ${tip} Talebi</h3>
             <p style="color:#555;font-size:14px"><strong>${hastaAd} ${hastaSoyad}</strong> size bir <strong>${tip.toLowerCase()}</strong> talebi gönderdi.</p>
             <div class="row"><span class="lbl">Hasta</span><span class="val">${hastaAd} ${hastaSoyad}</span></div>
-            <div class="row"><span class="lbl">E-posta</span><span class="val">${hastaEmail}</span></div>
-            ${hastaTelefon ? `<div class="row"><span class="lbl">Telefon</span><span class="val">${hastaTelefon}</span></div>` : ''}
             <div class="row"><span class="lbl">Görüşme Türü</span><span class="val">${turLabel(talep_turu)}</span></div>
             ${talep_tarihi ? `<div class="row"><span class="lbl">Talep Tarihi</span><span class="val">${formatTR(talep_tarihi)}</span></div>` : ''}
             ${hasta_notu ? `<div class="note"><strong>Hasta Notu:</strong> ${hasta_notu}</div>` : ''}

@@ -229,12 +229,14 @@ export function mailSeansTamamlandiUzman({ uzmanAd, hastaAd, hastaSoyad, seansNo
 
 export function mailUzmanProfilOnaylandi({ uzmanAd }) {
     return {
-        subject: `Profiliniz Onaylandı — ${APP_NAME}`,
+        subject: `Başvurunuz Onaylandı — ${APP_NAME}`,
         html: base(`
-            <h3 style="margin:0 0 16px;color:#15803d">✅ Profiliniz Onaylandı</h3>
-            <p style="color:#555;font-size:14px">Sayın <strong>${uzmanAd}</strong>, uzman başvurunuz incelendi ve profiliniz onaylandı.</p>
-            <div class="note" style="background:#f0fdf4;border-color:#22c55e;color:#15803d">Artık ${APP_NAME} platformunda hastalardan randevu talebi alabilirsiniz.</div>
-            <p style="font-size:13px;color:#888;margin-top:20px">Uzman panelinize giriş yaparak profilinizi güncelleyebilir ve randevularınızı yönetebilirsiniz.</p>
+            <h3 style="margin:0 0 16px;color:#15803d">✅ Başvurunuz Onaylandı</h3>
+            <p style="color:#555;font-size:14px">Sayın <strong>${uzmanAd}</strong>, uzman başvurunuz incelendi ve onaylandı. ${APP_NAME} ailesine hoş geldiniz!</p>
+            <div class="note" style="background:#f0fdf4;border-color:#22c55e;color:#15803d">
+                Artık platformumuzda aktif bir uzman olarak yer alıyorsunuz. Hastalar sizi keşfedebilir ve randevu talebinde bulunabilir.
+            </div>
+            <p style="font-size:13px;color:#888;margin-top:20px">Uzman panelinize giriş yaparak profilinizi tamamlayabilir ve randevularınızı yönetebilirsiniz.</p>
         `),
     };
 }
@@ -244,8 +246,9 @@ export function mailUzmanProfilReddedildi({ uzmanAd }) {
         subject: `Başvurunuz Hakkında Bilgilendirme — ${APP_NAME}`,
         html: base(`
             <h3 style="margin:0 0 16px;color:#b91c1c">Başvurunuz Hakkında</h3>
-            <p style="color:#555;font-size:14px">Sayın <strong>${uzmanAd}</strong>, uzman başvurunuz şu an için uygun değerlendirilememiştir.</p>
-            <p style="font-size:14px;color:#555;margin-top:16px">Daha fazla bilgi için <a href="mailto:${process.env.MAIL_FROM || ''}" style="color:${BRAND_COLOR}">${APP_NAME}</a> ile iletişime geçebilirsiniz.</p>
+            <p style="color:#555;font-size:14px">Sayın <strong>${uzmanAd}</strong>, uzman başvurunuz ekibimiz tarafından incelendi. Maalesef başvurunuz bu aşamada uygun bulunamamıştır.</p>
+            <div class="reject">Başvurunuzla ilgili daha fazla bilgi almak veya itirazda bulunmak isterseniz bizimle iletişime geçebilirsiniz.</div>
+            <p style="font-size:13px;color:#888;margin-top:20px">${APP_NAME} ekibi olarak ilginiz için teşekkür ederiz.</p>
         `),
     };
 }
@@ -285,10 +288,24 @@ export function mailHosGeldin({ ad, email }) {
     return {
         subject: `${APP_NAME}'a Hoş Geldiniz!`,
         html: base(`
-            <h3 style="margin:0 0 16px;color:${BRAND_COLOR}">Hoş Geldiniz! 👋</h3>
+            <h3 style="margin:0 0 16px;color:${BRAND_COLOR}">Hoş Geldiniz!</h3>
             <p style="color:#555;font-size:14px">Merhaba <strong>${ad || email}</strong>, ${APP_NAME} ailesine katıldığınız için teşekkür ederiz.</p>
             <div class="note" style="background:#eff6ff;border-color:#3b82f6;color:#1e40af">Hesabınız başarıyla oluşturuldu. Panelinize giriş yaparak uzman profillerini inceleyebilir ve randevu talebinde bulunabilirsiniz.</div>
             <p style="font-size:13px;color:#888;margin-top:20px">Herhangi bir sorunuz olursa bizimle iletişime geçmekten çekinmeyin.</p>
+        `),
+    };
+}
+
+export function mailUzmanHosGeldin({ ad, email }) {
+    return {
+        subject: `Başvurunuz Alındı — ${APP_NAME}`,
+        html: base(`
+            <h3 style="margin:0 0 16px;color:${BRAND_COLOR}">Hoş Geldiniz!</h3>
+            <p style="color:#555;font-size:14px">Merhaba <strong>${ad || email}</strong>, ${APP_NAME} uzman başvurunuzu aldık.</p>
+            <div class="note" style="background:#eff6ff;border-color:#3b82f6;color:#1e40af">
+                Başvurunuz ekibimiz tarafından incelenmektedir. En kısa sürede değerlendirme sonucunu e-posta ile bildireceğiz.
+            </div>
+            <p style="font-size:13px;color:#888;margin-top:20px">Sorularınız için bizimle iletişime geçmekten çekinmeyin.</p>
         `),
     };
 }

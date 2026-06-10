@@ -154,7 +154,7 @@ export default function UzmanRegister() {
                       className="w-full px-4 py-3 border-2 border-gray-100 rounded-2xl bg-gray-50 text-sm font-bold text-[#0a2e1a] outline-none focus:border-[#4ade80] focus:bg-white transition-all appearance-none"
                     >
                       <option value="">Seçiniz</option>
-                      {["Fizyoterapist", "Ortopedist", "Nöroloji Uzmanı", "Spor Hekimi"].map(u => <option key={u} value={u}>{u}</option>)}
+                      {["Fizyoterapist", "Ortopedist", "Nöroloji Uzmanı", "Spor Hekimi", "Fizik Tedavi Rehabilitasyon"].map(u => <option key={u} value={u}>{u}</option>)}
                     </select>
                   </div>
                 </div>

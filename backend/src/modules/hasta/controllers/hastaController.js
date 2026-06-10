@@ -6,7 +6,7 @@
 import bcrypt from 'bcryptjs';
 import pool from '../../../config/db.js';
 import { generateTokens } from '../../../core/auth/utils/jwtUtils.js';
-import { sendEmail, mailYeniRandevuUzman, mailYeniRandevuAdmin, mailSeansTamamlandiHasta, mailSeansTamamlandiUzman } from '../../../core/notifications/emailService.js';
+import { sendEmail, mailYeniRandevuUzman, mailYeniRandevuAdmin, mailSeansTamamlandiHasta, mailSeansTamamlandiUzman, mailHosGeldin } from '../../../core/notifications/emailService.js';
 import { sendWhatsApp, waYeniRandevuUzman } from '../../../core/notifications/whatsappService.js';
 
 /**
@@ -75,6 +75,15 @@ export const registerHasta = async (req, res) => {
                     status: 'active'
                 },
                 ...tokens
+            }
+        });
+
+        setImmediate(async () => {
+            try {
+                const { subject, html } = mailHosGeldin({ ad, email });
+                await sendEmail({ to: email, subject, html });
+            } catch (e) {
+                console.error('[Bildirim] Hoş geldin mail hatası:', e.message);
             }
         });
     } catch (error) {

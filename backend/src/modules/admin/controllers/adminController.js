@@ -204,12 +204,14 @@ export const updateUzmanApplicationStatus = async (req, res) => {
             });
         }
 
-        const [[uzman]] = await pool.query(
+        const [uzmanRows] = await pool.query(
             `SELECT u.email, up.ad, up.soyad FROM users u
              LEFT JOIN uzman_profiles up ON up.user_id = u.id
              WHERE u.id = ? AND u.role = 'uzman'`,
             [id]
         );
+        const uzman = uzmanRows[0];
+        console.log(`[Bildirim] updateUzmanApplicationStatus id=${id} status=${normalizedStatus} uzman=${JSON.stringify(uzman?.email)}`);
 
         await pool.query(
             'UPDATE users SET status = ? WHERE id = ? AND role = ?',
@@ -235,6 +237,8 @@ export const updateUzmanApplicationStatus = async (req, res) => {
                     console.error('[Bildirim] Uzman profil bildirim hatası:', e.message);
                 }
             });
+        } else {
+            console.warn(`[Bildirim] Uzman bulunamadı veya email yok, mail gönderilmedi. id=${id}`);
         }
     } catch (error) {
         console.error('Update application status error:', error);
@@ -328,7 +332,7 @@ export const updateUserStatus = async (req, res) => {
         const { id } = req.params;
         const { status } = req.body;
 
-        if (!['active', 'suspended', 'pending_approval', 'rejected'].includes(status)) {
+        if (!['active', 'approved', 'pending_approval', 'rejected'].includes(status)) {
             return res.status(400).json({
                 success: false,
                 message: 'Geçersiz durum'

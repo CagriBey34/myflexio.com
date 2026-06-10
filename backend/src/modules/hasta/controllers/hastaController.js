@@ -6,7 +6,7 @@
 import bcrypt from 'bcryptjs';
 import pool from '../../../config/db.js';
 import { generateTokens } from '../../../core/auth/utils/jwtUtils.js';
-import { sendEmail, mailYeniRandevuUzman, mailYeniRandevuAdmin, mailSeansTamamlandiHasta, mailSeansTamamlandiUzman, mailHosGeldin } from '../../../core/notifications/emailService.js';
+import { sendEmail, mailYeniRandevuUzman, mailYeniRandevuAdmin, mailSeansTamamlandiHasta, mailSeansTamamlandiUzman, mailHosGeldin, mailDekontYuklendi } from '../../../core/notifications/emailService.js';
 import { sendWhatsApp, waYeniRandevuUzman } from '../../../core/notifications/whatsappService.js';
 
 /**
@@ -998,6 +998,32 @@ export const uploadDekont = async (req, res) => {
 
         await connection.commit();
         res.status(200).json({ success: true, message: 'Dekont başarıyla yüklendi' });
+
+        setImmediate(async () => {
+            try {
+                const [[bilgi]] = await pool.execute(
+                    `SELECT hp.ad as hasta_ad, hp.soyad as hasta_soyad, hu.email as hasta_email,
+                            up.ad as uzman_ad, up.soyad as uzman_soyad, up.unvan as uzman_unvan,
+                            tp.tedavi_turu, tp.seans_sayisi, tp.toplam_ucret
+                     FROM tedavi_planlari tp
+                     INNER JOIN hasta_profiles hp ON tp.hasta_profile_id = hp.id
+                     INNER JOIN users hu ON hp.user_id = hu.id
+                     INNER JOIN uzman_profiles up ON tp.uzman_profile_id = up.id
+                     WHERE tp.id = ?`,
+                    [id]
+                );
+                if (bilgi && process.env.ADMIN_EMAIL) {
+                    const { subject, html } = mailDekontYuklendi({
+                        hastaAd: bilgi.hasta_ad, hastaSoyad: bilgi.hasta_soyad, hastaEmail: bilgi.hasta_email,
+                        uzmanUnvan: bilgi.uzman_unvan, uzmanAd: bilgi.uzman_ad, uzmanSoyad: bilgi.uzman_soyad,
+                        tedaviTuru: bilgi.tedavi_turu, seansSayisi: bilgi.seans_sayisi, toplamUcret: bilgi.toplam_ucret,
+                    });
+                    await sendEmail({ to: process.env.ADMIN_EMAIL, subject, html });
+                }
+            } catch (e) {
+                console.error('[Bildirim] Dekont bildirim hatası:', e.message);
+            }
+        });
     } catch (error) {
         await connection.rollback();
         console.error('uploadDekont error:', error);

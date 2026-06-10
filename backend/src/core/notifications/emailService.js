@@ -80,7 +80,7 @@ export function mailYeniRandevuUzman({ hastaAd, hastaSoyad, talep_tarihi, talep_
             <div class="row"><span class="lbl">Görüşme Türü</span><span class="val">${turLabel(talep_turu)}</span></div>
             ${talep_tarihi ? `<div class="row"><span class="lbl">Talep Tarihi</span><span class="val">${formatTR(talep_tarihi)}</span></div>` : ''}
             ${hasta_notu ? `<div class="note"><strong>Hasta Notu:</strong> ${hasta_notu}</div>` : ''}
-            <p style="font-size:13px;color:#888;margin-top:20px">Talep, admin onayından sonra aktif olacaktır. Randevu panelinizden takip edebilirsiniz.</p>
+            <p style="font-size:13px;color:#888;margin-top:20px">Randevu panelinizden takip edebilirsiniz.</p>
         `),
     };
 }
@@ -246,6 +246,37 @@ export function mailUzmanProfilReddedildi({ uzmanAd }) {
             <h3 style="margin:0 0 16px;color:#b91c1c">Başvurunuz Hakkında</h3>
             <p style="color:#555;font-size:14px">Sayın <strong>${uzmanAd}</strong>, uzman başvurunuz şu an için uygun değerlendirilememiştir.</p>
             <p style="font-size:14px;color:#555;margin-top:16px">Daha fazla bilgi için <a href="mailto:${process.env.MAIL_FROM || ''}" style="color:${BRAND_COLOR}">${APP_NAME}</a> ile iletişime geçebilirsiniz.</p>
+        `),
+    };
+}
+
+export function mailDekontYuklendi({ hastaAd, hastaSoyad, hastaEmail, uzmanUnvan, uzmanAd, uzmanSoyad, tedaviTuru, seansSayisi, toplamUcret }) {
+    return {
+        subject: `[Admin] Dekont Yüklendi — ${hastaAd} ${hastaSoyad} Onay Bekliyor`,
+        html: base(`
+            <h3 style="margin:0 0 16px;color:${BRAND_COLOR}">[Admin] Ödeme Dekontu Yüklendi</h3>
+            <p style="color:#555;font-size:14px"><strong>${hastaAd} ${hastaSoyad}</strong> ödeme dekontunu yükledi. Onay bekleniyor.</p>
+            <div class="row"><span class="lbl">Hasta</span><span class="val">${hastaAd} ${hastaSoyad}</span></div>
+            <div class="row"><span class="lbl">Hasta E-posta</span><span class="val">${hastaEmail}</span></div>
+            <div class="row"><span class="lbl">Uzman</span><span class="val">${uzmanUnvan} ${uzmanAd} ${uzmanSoyad}</span></div>
+            <div class="row"><span class="lbl">Tedavi Türü</span><span class="val">${turLabel(tedaviTuru)}</span></div>
+            <div class="row"><span class="lbl">Seans Sayısı</span><span class="val">${seansSayisi}</span></div>
+            <div class="row"><span class="lbl">Toplam Ücret</span><span class="val">${toplamUcret} ₺</span></div>
+            <p style="font-size:13px;color:#888;margin-top:20px">Admin panelinden dekontu inceleyip tedavi planını aktifleştirebilirsiniz.</p>
+        `),
+    };
+}
+
+export function mailTedaviPlaniAktif({ uzmanAd, hastaAd, hastaSoyad, tedaviTuru, seansSayisi }) {
+    return {
+        subject: `Tedavi Planı Aktifleştirildi — ${hastaAd} ${hastaSoyad}`,
+        html: base(`
+            <h3 style="margin:0 0 16px;color:#15803d">✅ Tedavi Planı Aktif</h3>
+            <p style="color:#555;font-size:14px">Sayın <strong>${uzmanAd}</strong>, hasta ödeme onaylandı ve tedavi planı aktifleştirildi.</p>
+            <div class="row"><span class="lbl">Hasta</span><span class="val">${hastaAd} ${hastaSoyad}</span></div>
+            <div class="row"><span class="lbl">Tedavi Türü</span><span class="val">${turLabel(tedaviTuru)}</span></div>
+            <div class="row"><span class="lbl">Seans Sayısı</span><span class="val">${seansSayisi}</span></div>
+            <div class="note" style="background:#f0fdf4;border-color:#22c55e;color:#15803d">Lütfen panelinizden ilk seans için tarih belirleyin.</div>
         `),
     };
 }

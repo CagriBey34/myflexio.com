@@ -4,7 +4,7 @@
  */
 
 import pool from '../../../config/db.js';
-import { sendEmail, mailOnaylandiHasta, mailOnaylandiUzman, mailReddedildiHasta, mailIptalHasta, mailIptalUzman, mailUzmanProfilOnaylandi, mailUzmanProfilReddedildi } from '../../../core/notifications/emailService.js';
+import { sendEmail, mailOnaylandiHasta, mailOnaylandiUzman, mailReddedildiHasta, mailIptalHasta, mailIptalUzman, mailUzmanProfilOnaylandi, mailUzmanProfilReddedildi, mailTedaviPlaniAktif } from '../../../core/notifications/emailService.js';
 import { sendWhatsApp, waOnaylandiHasta, waOnaylandiUzman, waReddedildiHasta } from '../../../core/notifications/whatsappService.js';
 
 /**
@@ -967,6 +967,31 @@ export const aktiveTedaviPlaniAdmin = async (req, res) => {
         await conn.commit();
         conn.release();
         res.status(200).json({ success: true, message: 'Tedavi planı aktifleştirildi' });
+
+        setImmediate(async () => {
+            try {
+                const [[bilgi]] = await pool.execute(
+                    `SELECT up.ad as uzman_ad, uu.email as uzman_email,
+                            hp.ad as hasta_ad, hp.soyad as hasta_soyad,
+                            tp.tedavi_turu, tp.seans_sayisi
+                     FROM tedavi_planlari tp
+                     INNER JOIN uzman_profiles up ON tp.uzman_profile_id = up.id
+                     INNER JOIN users uu ON up.user_id = uu.id
+                     INNER JOIN hasta_profiles hp ON tp.hasta_profile_id = hp.id
+                     WHERE tp.id = ?`,
+                    [id]
+                );
+                if (bilgi?.uzman_email) {
+                    const { subject, html } = mailTedaviPlaniAktif({
+                        uzmanAd: bilgi.uzman_ad, hastaAd: bilgi.hasta_ad, hastaSoyad: bilgi.hasta_soyad,
+                        tedaviTuru: bilgi.tedavi_turu, seansSayisi: bilgi.seans_sayisi,
+                    });
+                    await sendEmail({ to: bilgi.uzman_email, subject, html });
+                }
+            } catch (e) {
+                console.error('[Bildirim] Tedavi planı aktif bildirim hatası:', e.message);
+            }
+        });
     } catch (error) {
         await conn.rollback();
         conn.release();

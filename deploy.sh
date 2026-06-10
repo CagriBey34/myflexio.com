@@ -12,7 +12,7 @@ git pull origin main
 # 2. Frontend build
 echo "⚙️  Frontend build ediliyor..."
 cd frontend
-npm install --silent
+npm install --legacy-peer-deps --silent
 npm run build
 cd ..
 

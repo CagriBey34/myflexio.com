@@ -1,6 +1,6 @@
 services:
   mysql:
-    image: mysql:8.0
+    image: mysql:8.0.32
     container_name: myflexio-mysql
     command: --default-time-zone=+03:00
     environment:

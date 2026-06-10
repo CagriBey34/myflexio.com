@@ -68,3 +68,8 @@ export const uzmanSeansOnay = async (seansId) => {
     const response = await api.patch(`/uzman/seanslar/${seansId}/seans-ver`);
     return response.data;
 };
+
+export const getHastaRaporlari = async (hastaProfileId) => {
+    const response = await api.get(`/uzman/hasta/${hastaProfileId}/raporlar`);
+    return response.data;
+};

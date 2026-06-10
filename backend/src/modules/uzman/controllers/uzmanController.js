@@ -833,3 +833,41 @@ export const uzmanSeansOnay = async (req, res) => {
         res.status(500).json({ success: false, message: 'Sunucu hatası' });
     }
 };
+
+/**
+ * GET /api/uzman/hasta/:hastaProfileId/raporlar
+ * Uzmanın randevusu olan hastanın tıbbi raporlarını getirir
+ */
+export const getHastaRaporlari = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { hastaProfileId } = req.params;
+
+        const [profiles] = await pool.execute(
+            'SELECT id FROM uzman_profiles WHERE user_id = ?', [userId]
+        );
+        if (profiles.length === 0) {
+            return res.status(404).json({ success: false, message: 'Uzman profili bulunamadı' });
+        }
+        const uzman_profile_id = profiles[0].id;
+
+        // Uzmanın bu hastayla randevusu olup olmadığını kontrol et
+        const [check] = await pool.execute(
+            'SELECT id FROM randevular WHERE uzman_profile_id = ? AND hasta_profile_id = ? LIMIT 1',
+            [uzman_profile_id, hastaProfileId]
+        );
+        if (check.length === 0) {
+            return res.status(403).json({ success: false, message: 'Bu hastanın raporlarına erişim yetkiniz yok' });
+        }
+
+        const [raporlar] = await pool.execute(
+            'SELECT id, tip, dosya_url, aciklama, created_at FROM medical_reports WHERE hasta_profile_id = ? ORDER BY created_at DESC',
+            [hastaProfileId]
+        );
+
+        res.status(200).json({ success: true, data: raporlar });
+    } catch (error) {
+        console.error('getHastaRaporlari error:', error);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};

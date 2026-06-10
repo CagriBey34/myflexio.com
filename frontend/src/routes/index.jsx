@@ -31,6 +31,7 @@ import UzmanRandevular from '../modules/uzman/pages/Randevular';
 import HastaDashboard from '../modules/hasta/pages/Dashboard';
 import HastaProfile from '../modules/hasta/pages/Profile';
 import CompleteProfile from '../modules/hasta/pages/CompleteProfile';
+import HastaEditProfile from '../modules/hasta/pages/EditProfile';
 import Assessment from '../modules/hasta/pages/Assessment';
 import AssessmentList from '../modules/hasta/pages/AssessmentList';
 import AssessmentDetail from '../modules/hasta/pages/AssessmentDetail';
@@ -142,6 +143,10 @@ const router = createBrowserRouter([
             {
                 path: '/hasta/profile/complete',
                 element: <CompleteProfile />,
+            },
+            {
+                path: '/hasta/profile/edit',
+                element: <HastaEditProfile />,
             },
             {
                 path: '/hasta/assessment',

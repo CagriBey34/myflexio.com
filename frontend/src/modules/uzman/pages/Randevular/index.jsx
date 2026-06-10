@@ -5,9 +5,9 @@ import {
     ChevronDown, User, AlertCircle,
     Video, Edit3, Loader2, Activity,
     ClipboardList, MapPin,
-    Phone, Mail, CheckSquare
+    Phone, Mail, CheckSquare, FileText, ExternalLink
 } from 'lucide-react';
-import { getUzmanRandevular, createTedaviPlani, getUzmanTedaviPlanlari, uzmanSeansVer, getUzmanEslesmeler, getEslesmeSeanslari, setSeansTargihi, uzmanSeansOnay } from '../../services/uzmanService';
+import { getUzmanRandevular, createTedaviPlani, getUzmanTedaviPlanlari, uzmanSeansVer, getUzmanEslesmeler, getEslesmeSeanslari, setSeansTargihi, uzmanSeansOnay, getHastaRaporlari } from '../../services/uzmanService';
 import api from '../../../../shared/services/api';
 
 const PLAN_DURUM_CONFIG = {
@@ -309,13 +309,36 @@ function KesinTarihForm({ randevuId, mevcutTarih, onSaved }) {
     );
 }
 
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/api$/, '');
+
 function RandevuCard({ randevu, onRefresh }) {
     const [expanded, setExpanded] = useState(false);
     const [seansLoading, setSeansLoading] = useState(false);
+    const [raporlar, setRaporlar] = useState([]);
+    const [raporlarLoaded, setRaporlarLoaded] = useState(false);
+    const [raporHata, setRaporHata] = useState('');
 
     const isOnGorusme = randevu.randevu_tipi === 'on_gorusme';
     const eslesme = randevu.eslesme_var == 1;
     const seansVerildi = !!randevu.uzman_seans_onayladi;
+
+    const handleToggle = async () => {
+        const opening = !expanded;
+        setExpanded(opening);
+        if (opening && !raporlarLoaded) {
+            try {
+                const res = await getHastaRaporlari(randevu.hasta_profile_id);
+                setRaporlar(res.data || []);
+                setRaporHata('');
+            } catch (e) {
+                console.error('Raporlar yüklenemedi:', e);
+                setRaporHata(e.response?.data?.message || 'Raporlar yüklenemedi.');
+                setRaporlar([]);
+            } finally {
+                setRaporlarLoaded(true);
+            }
+        }
+    };
 
     const handleSeansVer = async () => {
         setSeansLoading(true);
@@ -341,7 +364,7 @@ function RandevuCard({ randevu, onRefresh }) {
         >
             <div
                 className="flex items-center gap-4 p-5 md:p-6 cursor-pointer hover:bg-gray-50/50 transition-colors"
-                onClick={() => setExpanded(!expanded)}
+                onClick={handleToggle}
             >
                 {/* Tarih / Ön Görüşme kutusu */}
                 {isOnGorusme ? (
@@ -572,6 +595,57 @@ function RandevuCard({ randevu, onRefresh }) {
                             {isOnGorusme && randevu.plan_gonderildi && (
                                 <div className="flex items-center gap-2 text-[#16a34a] bg-[#dcfce7] px-4 py-3 rounded-2xl text-xs font-black">
                                     <CheckCircle size={16} /> Seans planı hastaya iletildi.
+                                </div>
+                            )}
+
+                            {/* Tıbbi Raporlar */}
+                            {(
+                                <div className="bg-white rounded-[1.5rem] p-5 border border-gray-100">
+                                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-1.5">
+                                        <FileText size={12} className="text-[#16a34a]" /> Tıbbi Raporlar
+                                    </div>
+                                    {!raporlarLoaded ? (
+                                        <div className="flex items-center gap-2 text-xs text-gray-400 font-bold py-2">
+                                            <Loader2 size={14} className="animate-spin" /> Raporlar yükleniyor...
+                                        </div>
+                                    ) : raporHata ? (
+                                        <p className="text-xs text-red-500 font-bold py-2 flex items-center gap-1.5">
+                                            <XCircle size={13} /> {raporHata}
+                                        </p>
+                                    ) : raporlar.length === 0 ? (
+                                        <p className="text-xs text-gray-400 font-bold py-2">Hasta henüz rapor yüklememiş.</p>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            {raporlar.map(rapor => (
+                                                <div key={rapor.id} className="flex items-center justify-between bg-[#f8fafc] border border-gray-100 rounded-2xl px-4 py-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 bg-[#dcfce7] text-[#16a34a] rounded-lg">
+                                                            <FileText size={16} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs font-black text-[#0a2e1a] capitalize">
+                                                                {rapor.tip.replace(/_/g, ' ')}
+                                                            </p>
+                                                            {rapor.aciklama && (
+                                                                <p className="text-[10px] text-gray-400 font-medium mt-0.5">{rapor.aciklama}</p>
+                                                            )}
+                                                            <p className="text-[10px] font-black text-gray-400 uppercase mt-0.5">
+                                                                {new Date(rapor.created_at).toLocaleDateString('tr-TR')}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <a
+                                                        href={`${API_BASE}${rapor.dosya_url}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-2 bg-white border border-gray-200 text-gray-400 hover:text-[#16a34a] hover:border-[#4ade80] rounded-xl transition-all"
+                                                    >
+                                                        <ExternalLink size={16} />
+                                                    </a>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 

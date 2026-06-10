@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { registerUzman, completeProfile, getProfile, getUzmanRandevular, setKesinTarih, createTedaviPlani, updateIban, getUzmanTedaviPlanlari, uzmanSeansVer, getUzmanEslesmeler, getEslesmeSeanslariUzman, setSeansTargihi, uzmanSeansOnay } from '../controllers/uzmanController.js';
+import { registerUzman, completeProfile, getProfile, getUzmanRandevular, setKesinTarih, createTedaviPlani, updateIban, getUzmanTedaviPlanlari, uzmanSeansVer, getUzmanEslesmeler, getEslesmeSeanslariUzman, setSeansTargihi, uzmanSeansOnay, getHastaRaporlari } from '../controllers/uzmanController.js';
 import {
     getUzmanArticles,
     getUzmanArticleById,
@@ -73,6 +73,7 @@ router.get('/reviews', authenticate, getUzmanOwnReviews);
 router.get('/randevular', authenticate, getUzmanRandevular);
 router.patch('/randevular/:id/kesin-tarih', authenticate, setKesinTarih);
 router.patch('/randevular/:id/seans-ver', authenticate, uzmanSeansVer);
+router.get('/hasta/:hastaProfileId/raporlar', authenticate, getHastaRaporlari);
 
 // Tedavi planı routes
 router.post('/tedavi-plani', authenticate, createTedaviPlani);

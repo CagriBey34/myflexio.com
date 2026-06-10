@@ -1090,7 +1090,7 @@ export const hastaSeansOnay = async (req, res) => {
                     const [[bilgi]] = await pool.execute(
                         `SELECT hp.ad as hasta_ad, hu.email as hasta_email,
                                 up.ad as uzman_ad, up.soyad as uzman_soyad, up.unvan as uzman_unvan, uu.email as uzman_email,
-                                s.seans_no, tp.toplam_seans
+                                s.seans_no, tp.seans_sayisi
                          FROM seanslar s
                          INNER JOIN tedavi_planlari tp ON s.tedavi_plani_id = tp.id
                          INNER JOIN hasta_profiles hp ON tp.hasta_profile_id = hp.id
@@ -1104,14 +1104,14 @@ export const hastaSeansOnay = async (req, res) => {
                         const { subject, html } = mailSeansTamamlandiHasta({
                             hastaAd: bilgi.hasta_ad, uzmanUnvan: bilgi.uzman_unvan,
                             uzmanAd: bilgi.uzman_ad, uzmanSoyad: bilgi.uzman_soyad,
-                            seansNo: bilgi.seans_no, toplamSeans: bilgi.toplam_seans,
+                            seansNo: bilgi.seans_no, toplamSeans: bilgi.seans_sayisi,
                         });
                         await sendEmail({ to: bilgi.hasta_email, subject, html });
                     }
                     if (bilgi?.uzman_email) {
                         const { subject, html } = mailSeansTamamlandiUzman({
                             uzmanAd: bilgi.uzman_ad, hastaAd: bilgi.hasta_ad, hastaSoyad: '',
-                            seansNo: bilgi.seans_no, toplamSeans: bilgi.toplam_seans,
+                            seansNo: bilgi.seans_no, toplamSeans: bilgi.seans_sayisi,
                         });
                         await sendEmail({ to: bilgi.uzman_email, subject, html });
                     }

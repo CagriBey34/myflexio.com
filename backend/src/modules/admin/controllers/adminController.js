@@ -339,6 +339,14 @@ export const updateUserStatus = async (req, res) => {
             });
         }
 
+        const [userRows] = await pool.query(
+            `SELECT u.email, u.role, up.ad FROM users u
+             LEFT JOIN uzman_profiles up ON up.user_id = u.id
+             WHERE u.id = ?`,
+            [id]
+        );
+        const user = userRows[0];
+
         await pool.query(
             'UPDATE users SET status = ? WHERE id = ?',
             [status, id]
@@ -348,6 +356,22 @@ export const updateUserStatus = async (req, res) => {
             success: true,
             message: 'Kullanıcı durumu güncellendi'
         });
+
+        if (user?.role === 'uzman' && user?.email) {
+            setImmediate(async () => {
+                try {
+                    if (status === 'active' || status === 'approved') {
+                        const { subject, html } = mailUzmanProfilOnaylandi({ uzmanAd: user.ad || user.email });
+                        await sendEmail({ to: user.email, subject, html });
+                    } else if (status === 'rejected') {
+                        const { subject, html } = mailUzmanProfilReddedildi({ uzmanAd: user.ad || user.email });
+                        await sendEmail({ to: user.email, subject, html });
+                    }
+                } catch (e) {
+                    console.error('[Bildirim] Kullanıcı durum bildirim hatası:', e.message);
+                }
+            });
+        }
     } catch (error) {
         console.error('Update user status error:', error);
         res.status(500).json({

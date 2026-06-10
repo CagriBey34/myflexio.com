@@ -59,7 +59,8 @@ export async function sendEmail({ to, subject, html }) {
         return;
     }
     try {
-        await t.sendMail({ from: `"${APP_NAME}" <${process.env.SMTP_USER}>`, to, subject, html });
+        const fromAddress = process.env.MAIL_FROM || process.env.SMTP_USER;
+        await t.sendMail({ from: `"${APP_NAME}" <${fromAddress}>`, to, subject, html });
         console.log(`[Email] ✓ Gönderildi: ${to}`);
     } catch (err) {
         console.error(`[Email] ✗ Hata (${to}):`, err.message);

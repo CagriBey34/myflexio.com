@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { User, GraduationCap, Award, FileText, ChevronRight, ChevronLeft, Upload, X, Save, ArrowLeft, HeartPulse, BadgeDollarSign } from 'lucide-react';
 import { getProfile, completeProfile } from '../../services/uzmanService';
 import Input from '../../../../shared/components/ui/Input';
+import IlIlceSelect from '../../../../shared/components/ui/IlIlceSelect';
 
 const EXPERTISE_OPTIONS = {
     vucutBolgesi: ['Bel', 'Boyun', 'Omuz', 'Diz', 'Kalça', 'Ayak Bileği', 'Dirsek', 'Bilek', 'El', 'Sırt', 'Kol', 'Bacak'],
@@ -277,24 +278,13 @@ export default function EditProfile() {
                             </div>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-5">
-                            <Input
-                                label="Şehir"
-                                required
-                                value={formData.sehir}
-                                onChange={(e) => setFormData({ ...formData, sehir: e.target.value })}
-                                placeholder="İstanbul"
-                                className="border-gray-200 focus:ring-2 focus:ring-[#4ade80] rounded-xl"
-                            />
-                            <Input
-                                label="İlçe"
-                                required
-                                value={formData.ilce}
-                                onChange={(e) => setFormData({ ...formData, ilce: e.target.value })}
-                                placeholder="Kadıköy"
-                                className="border-gray-200 focus:ring-2 focus:ring-[#4ade80] rounded-xl"
-                            />
-                        </div>
+                        <IlIlceSelect
+                            sehir={formData.sehir}
+                            ilce={formData.ilce}
+                            onSehirChange={(val) => setFormData(prev => ({ ...prev, sehir: val, ilce: '' }))}
+                            onIlceChange={(val) => setFormData(prev => ({ ...prev, ilce: val }))}
+                            theme="green"
+                        />
 
                         <div className="pt-2">
                             <label className="block text-sm font-bold text-[#0a2e1a] mb-3">Profil Fotoğrafı</label>
@@ -594,19 +584,34 @@ export default function EditProfile() {
                     </div>
 
                     <div className="mb-10">
-                        <div className="flex gap-3 mb-3">
-                            {[1, 2, 3, 4].map((step) => (
-                                <div
-                                    key={step}
-                                    className={`flex-1 h-2 rounded-full transition-all duration-500 ${
-                                        step <= currentStep ? 'bg-[#4ade80]' : 'bg-gray-100'
-                                    }`}
-                                />
-                            ))}
+                        <div className="flex items-start mb-1">
+                            {['Kişisel', 'Eğitim', 'Uzmanlık', 'Sertifikalar', 'Ücretler'].map((label, index) => {
+                                const step = index + 1;
+                                const completed = step < currentStep;
+                                const active = step === currentStep;
+                                return (
+                                    <div key={step} className={`flex items-start ${index < 4 ? 'flex-1' : ''}`}>
+                                        <div className="flex flex-col items-center">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                                                completed ? 'bg-[#4ade80] text-[#0a2e1a]' :
+                                                active ? 'bg-[#0f4c35] text-white ring-4 ring-[#dcfce7]' :
+                                                'bg-gray-100 text-gray-400'
+                                            }`}>
+                                                {completed ? '✓' : step}
+                                            </div>
+                                            <span className={`text-[10px] mt-1.5 font-bold ${active || completed ? 'text-[#0f4c35]' : 'text-gray-400'}`}>
+                                                {label}
+                                            </span>
+                                        </div>
+                                        {index < 4 && (
+                                            <div className={`flex-1 h-1 mt-3.5 mx-1 rounded-full transition-all duration-300 ${
+                                                completed ? 'bg-[#4ade80]' : 'bg-gray-100'
+                                            }`} />
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
-                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest text-right">
-                            Adım {currentStep} / {totalSteps}
-                        </p>
                     </div>
 
                     {error && (

@@ -1,7 +1,8 @@
-import { MapPin, User, Activity, Briefcase, Calendar, Thermometer } from 'lucide-react';
+import { MapPin, User, Activity, Briefcase, Thermometer } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Input from '../../../../../shared/components/ui/Input';
 import Button from '../../../../../shared/components/ui/Button';
+import IlIlceSelect from '../../../../../shared/components/ui/IlIlceSelect';
 
 // Sabitler
 const PAIN_REGIONS = ['Bel', 'Boyun', 'Omuz', 'Diz', 'Kalça', 'Ayak Bileği', 'Sırt', 'El Bileği', 'Dirsek'];
@@ -41,10 +42,13 @@ export default function Step1Location({ formData, setFormData, onNext }) {
                     <MapPin size={16} className="text-blue-600" />
                     <span className="text-xs font-black text-slate-700 uppercase tracking-wider">Lokasyon & Demografi</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input label="Şehir" icon={MapPin} value={formData.sehir} onChange={e => setFormData({...formData, sehir: e.target.value})} placeholder="Örn: İstanbul" />
-                    <Input label="İlçe" icon={MapPin} value={formData.ilce} onChange={e => setFormData({...formData, ilce: e.target.value})} placeholder="Örn: Beşiktaş" />
-                </div>
+                <IlIlceSelect
+                    sehir={formData.sehir}
+                    ilce={formData.ilce}
+                    onSehirChange={(val) => setFormData(prev => ({ ...prev, sehir: val, ilce: '' }))}
+                    onIlceChange={(val) => setFormData(prev => ({ ...prev, ilce: val }))}
+                    theme="blue"
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input label="Doğum Tarihi" type="date" value={formData.dogumTarihi} onChange={e => setFormData({...formData, dogumTarihi: e.target.value})} />
                     <div className="space-y-2">

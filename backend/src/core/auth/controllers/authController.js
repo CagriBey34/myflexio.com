@@ -6,6 +6,7 @@
 import bcrypt from 'bcryptjs';
 import pool from '../../../config/db.js';
 import { generateTokens, verifyRefreshToken } from '../utils/jwtUtils.js';
+import { sendEmail, mailHosGeldin } from '../../notifications/emailService.js';
 
 /**
  * Register a new user
@@ -62,6 +63,15 @@ export const register = async (req, res) => {
                     name
                 },
                 ...tokens
+            }
+        });
+
+        setImmediate(async () => {
+            try {
+                const { subject, html } = mailHosGeldin({ ad: name, email });
+                await sendEmail({ to: email, subject, html });
+            } catch (e) {
+                console.error('[Bildirim] Hoş geldin mail hatası:', e.message);
             }
         });
     } catch (error) {

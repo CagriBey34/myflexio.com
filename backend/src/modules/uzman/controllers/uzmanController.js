@@ -6,7 +6,7 @@
 import bcrypt from 'bcryptjs';
 import pool from '../../../config/db.js';
 import { generateTokens } from '../../../core/auth/utils/jwtUtils.js';
-import { sendEmail, mailKesinTarihHasta } from '../../../core/notifications/emailService.js';
+import { sendEmail, mailKesinTarihHasta, mailSeansAyarlandiHasta, mailSeansTamamlandiHasta, mailSeansTamamlandiUzman } from '../../../core/notifications/emailService.js';
 import { sendWhatsApp, waKesinTarihHasta } from '../../../core/notifications/whatsappService.js';
 
 /**
@@ -779,6 +779,33 @@ export const setSeansTargihi = async (req, res) => {
 
         await pool.execute('UPDATE seanslar SET tarih = ? WHERE id = ?', [tarih, seansId]);
         res.status(200).json({ success: true, message: 'Tarih kaydedildi' });
+
+        setImmediate(async () => {
+            try {
+                const [[bilgi]] = await pool.execute(
+                    `SELECT hp.ad as hasta_ad, hu.email as hasta_email,
+                            up.ad as uzman_ad, up.soyad as uzman_soyad, up.unvan as uzman_unvan,
+                            s.seans_no, tp.toplam_seans
+                     FROM seanslar s
+                     INNER JOIN tedavi_planlari tp ON s.tedavi_plani_id = tp.id
+                     INNER JOIN hasta_profiles hp ON tp.hasta_profile_id = hp.id
+                     INNER JOIN users hu ON hp.user_id = hu.id
+                     INNER JOIN uzman_profiles up ON tp.uzman_profile_id = up.id
+                     WHERE s.id = ?`,
+                    [seansId]
+                );
+                if (bilgi?.hasta_email) {
+                    const { subject, html } = mailSeansAyarlandiHasta({
+                        hastaAd: bilgi.hasta_ad, uzmanUnvan: bilgi.uzman_unvan,
+                        uzmanAd: bilgi.uzman_ad, uzmanSoyad: bilgi.uzman_soyad,
+                        tarih, seansNo: bilgi.seans_no,
+                    });
+                    await sendEmail({ to: bilgi.hasta_email, subject, html });
+                }
+            } catch (e) {
+                console.error('[Bildirim] Seans tarih bildirim hatası:', e.message);
+            }
+        });
     } catch (error) {
         console.error('setSeansTargihi error:', error);
         res.status(500).json({ success: false, message: 'Sunucu hatası' });
@@ -815,6 +842,7 @@ export const uzmanSeansOnay = async (req, res) => {
             [seansId]
         );
 
+        let seansTamamlandi = false;
         if (seans.hasta_seans_onayladi) {
             await conn.execute(`UPDATE seanslar SET durum = 'tamamlandi' WHERE id = ?`, [seansId]);
             await conn.execute(
@@ -822,10 +850,48 @@ export const uzmanSeansOnay = async (req, res) => {
                  WHERE tedavi_plani_id = ? AND seans_no = ? AND durum = 'bekliyor'`,
                 [seans.tedavi_plani_id, seans.seans_no + 1]
             );
+            seansTamamlandi = true;
         }
         await conn.commit();
         conn.release();
         res.status(200).json({ success: true, message: 'Seans onaylandı' });
+
+        if (seansTamamlandi) {
+            setImmediate(async () => {
+                try {
+                    const [[bilgi]] = await pool.execute(
+                        `SELECT hp.ad as hasta_ad, hu.email as hasta_email,
+                                up.ad as uzman_ad, up.soyad as uzman_soyad, up.unvan as uzman_unvan, uu.email as uzman_email,
+                                s.seans_no, tp.toplam_seans
+                         FROM seanslar s
+                         INNER JOIN tedavi_planlari tp ON s.tedavi_plani_id = tp.id
+                         INNER JOIN hasta_profiles hp ON tp.hasta_profile_id = hp.id
+                         INNER JOIN users hu ON hp.user_id = hu.id
+                         INNER JOIN uzman_profiles up ON tp.uzman_profile_id = up.id
+                         INNER JOIN users uu ON up.user_id = uu.id
+                         WHERE s.id = ?`,
+                        [seansId]
+                    );
+                    if (bilgi?.hasta_email) {
+                        const { subject, html } = mailSeansTamamlandiHasta({
+                            hastaAd: bilgi.hasta_ad, uzmanUnvan: bilgi.uzman_unvan,
+                            uzmanAd: bilgi.uzman_ad, uzmanSoyad: bilgi.uzman_soyad,
+                            seansNo: bilgi.seans_no, toplamSeans: bilgi.toplam_seans,
+                        });
+                        await sendEmail({ to: bilgi.hasta_email, subject, html });
+                    }
+                    if (bilgi?.uzman_email) {
+                        const { subject, html } = mailSeansTamamlandiUzman({
+                            uzmanAd: bilgi.uzman_ad, hastaAd: bilgi.hasta_ad, hastaSoyad: '',
+                            seansNo: bilgi.seans_no, toplamSeans: bilgi.toplam_seans,
+                        });
+                        await sendEmail({ to: bilgi.uzman_email, subject, html });
+                    }
+                } catch (e) {
+                    console.error('[Bildirim] Seans tamamlandı bildirim hatası:', e.message);
+                }
+            });
+        }
     } catch (error) {
         await conn.rollback();
         conn.release();

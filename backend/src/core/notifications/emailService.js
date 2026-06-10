@@ -163,3 +163,103 @@ export function mailKesinTarihHasta({ hastaAd, uzmanUnvan, uzmanAd, uzmanSoyad, 
         `),
     };
 }
+
+export function mailIptalHasta({ hastaAd, uzmanUnvan, uzmanAd, uzmanSoyad, red_notu }) {
+    return {
+        subject: `Randevunuz İptal Edildi`,
+        html: base(`
+            <h3 style="margin:0 0 16px;color:#b91c1c">Randevunuz İptal Edildi</h3>
+            <p style="color:#555;font-size:14px">Sayın <strong>${hastaAd}</strong>, <strong>${uzmanUnvan} ${uzmanAd} ${uzmanSoyad}</strong> ile olan randevunuz iptal edilmiştir.</p>
+            ${red_notu ? `<div class="reject"><strong>Açıklama:</strong> ${red_notu}</div>` : ''}
+            <p style="font-size:14px;color:#555;margin-top:16px">Farklı bir tarih veya uzman için yeni randevu talebinde bulunabilirsiniz.</p>
+        `),
+    };
+}
+
+export function mailIptalUzman({ uzmanAd, hastaAd, hastaSoyad, talep_tarihi, talep_turu }) {
+    return {
+        subject: `Randevu İptal Edildi — ${hastaAd} ${hastaSoyad}`,
+        html: base(`
+            <h3 style="margin:0 0 16px;color:#b91c1c">Randevu İptal Edildi</h3>
+            <p style="color:#555;font-size:14px">Sayın <strong>${uzmanAd}</strong>, <strong>${hastaAd} ${hastaSoyad}</strong> ile olan randevu iptal edilmiştir.</p>
+            <div class="row"><span class="lbl">Hasta</span><span class="val">${hastaAd} ${hastaSoyad}</span></div>
+            <div class="row"><span class="lbl">Görüşme Türü</span><span class="val">${turLabel(talep_turu)}</span></div>
+            ${talep_tarihi ? `<div class="row"><span class="lbl">Tarih</span><span class="val">${formatTR(talep_tarihi)}</span></div>` : ''}
+        `),
+    };
+}
+
+export function mailSeansAyarlandiHasta({ hastaAd, uzmanUnvan, uzmanAd, uzmanSoyad, tarih, seansNo }) {
+    return {
+        subject: `Seans ${seansNo} Tarihiniz Belirlendi — ${new Date(tarih).toLocaleDateString('tr-TR')}`,
+        html: base(`
+            <h3 style="margin:0 0 16px;color:${BRAND_COLOR}">📅 Seans Tarihiniz Belirlendi</h3>
+            <p style="color:#555;font-size:14px">Sayın <strong>${hastaAd}</strong>, <strong>${seansNo}. seans</strong> tarihiniz belirlendi.</p>
+            <div class="date-box"><div class="d">${formatTR(tarih)}</div></div>
+            <div class="row"><span class="lbl">Uzman</span><span class="val">${uzmanUnvan} ${uzmanAd} ${uzmanSoyad}</span></div>
+            <div class="row"><span class="lbl">Seans No</span><span class="val">${seansNo}. Seans</span></div>
+            <p style="font-size:13px;color:#888;margin-top:20px">Lütfen belirtilen tarih ve saatte hazır olunuz.</p>
+        `),
+    };
+}
+
+export function mailSeansTamamlandiHasta({ hastaAd, uzmanUnvan, uzmanAd, uzmanSoyad, seansNo, toplamSeans }) {
+    return {
+        subject: `${seansNo}. Seans Tamamlandı`,
+        html: base(`
+            <h3 style="margin:0 0 16px;color:#15803d">✅ ${seansNo}. Seans Tamamlandı</h3>
+            <p style="color:#555;font-size:14px">Sayın <strong>${hastaAd}</strong>, <strong>${seansNo}. seans</strong> başarıyla tamamlanmıştır.</p>
+            <div class="row"><span class="lbl">Uzman</span><span class="val">${uzmanUnvan} ${uzmanAd} ${uzmanSoyad}</span></div>
+            <div class="row"><span class="lbl">İlerleme</span><span class="val">${seansNo} / ${toplamSeans} seans</span></div>
+            ${seansNo < toplamSeans ? '<div class="note">Bir sonraki seans tarihiniz uzmanınız tarafından belirlenecektir.</div>' : '<div class="note" style="background:#f0fdf4;border-color:#22c55e;color:#15803d">Tüm seanslarınız tamamlandı. Tedavi programınız başarıyla sonuçlandı.</div>'}
+        `),
+    };
+}
+
+export function mailSeansTamamlandiUzman({ uzmanAd, hastaAd, hastaSoyad, seansNo, toplamSeans }) {
+    return {
+        subject: `Seans Tamamlandı — ${hastaAd} ${hastaSoyad} (${seansNo}/${toplamSeans})`,
+        html: base(`
+            <h3 style="margin:0 0 16px;color:#15803d">✅ Seans Tamamlandı</h3>
+            <p style="color:#555;font-size:14px">Sayın <strong>${uzmanAd}</strong>, <strong>${hastaAd} ${hastaSoyad}</strong> ile <strong>${seansNo}. seans</strong> her iki tarafça onaylandı.</p>
+            <div class="row"><span class="lbl">Hasta</span><span class="val">${hastaAd} ${hastaSoyad}</span></div>
+            <div class="row"><span class="lbl">İlerleme</span><span class="val">${seansNo} / ${toplamSeans} seans</span></div>
+            ${seansNo < toplamSeans ? '<div class="note">Lütfen panelinizden bir sonraki seans için tarih belirleyin.</div>' : '<div class="note" style="background:#f0fdf4;border-color:#22c55e;color:#15803d">Tüm seanslar tamamlandı. Tedavi programı başarıyla sonuçlandı.</div>'}
+        `),
+    };
+}
+
+export function mailUzmanProfilOnaylandi({ uzmanAd }) {
+    return {
+        subject: `Profiliniz Onaylandı — ${APP_NAME}`,
+        html: base(`
+            <h3 style="margin:0 0 16px;color:#15803d">✅ Profiliniz Onaylandı</h3>
+            <p style="color:#555;font-size:14px">Sayın <strong>${uzmanAd}</strong>, uzman başvurunuz incelendi ve profiliniz onaylandı.</p>
+            <div class="note" style="background:#f0fdf4;border-color:#22c55e;color:#15803d">Artık ${APP_NAME} platformunda hastalardan randevu talebi alabilirsiniz.</div>
+            <p style="font-size:13px;color:#888;margin-top:20px">Uzman panelinize giriş yaparak profilinizi güncelleyebilir ve randevularınızı yönetebilirsiniz.</p>
+        `),
+    };
+}
+
+export function mailUzmanProfilReddedildi({ uzmanAd }) {
+    return {
+        subject: `Başvurunuz Hakkında Bilgilendirme — ${APP_NAME}`,
+        html: base(`
+            <h3 style="margin:0 0 16px;color:#b91c1c">Başvurunuz Hakkında</h3>
+            <p style="color:#555;font-size:14px">Sayın <strong>${uzmanAd}</strong>, uzman başvurunuz şu an için uygun değerlendirilememiştir.</p>
+            <p style="font-size:14px;color:#555;margin-top:16px">Daha fazla bilgi için <a href="mailto:${process.env.MAIL_FROM || ''}" style="color:${BRAND_COLOR}">${APP_NAME}</a> ile iletişime geçebilirsiniz.</p>
+        `),
+    };
+}
+
+export function mailHosGeldin({ ad, email }) {
+    return {
+        subject: `${APP_NAME}'a Hoş Geldiniz!`,
+        html: base(`
+            <h3 style="margin:0 0 16px;color:${BRAND_COLOR}">Hoş Geldiniz! 👋</h3>
+            <p style="color:#555;font-size:14px">Merhaba <strong>${ad || email}</strong>, ${APP_NAME} ailesine katıldığınız için teşekkür ederiz.</p>
+            <div class="note" style="background:#eff6ff;border-color:#3b82f6;color:#1e40af">Hesabınız başarıyla oluşturuldu. Panelinize giriş yaparak uzman profillerini inceleyebilir ve randevu talebinde bulunabilirsiniz.</div>
+            <p style="font-size:13px;color:#888;margin-top:20px">Herhangi bir sorunuz olursa bizimle iletişime geçmekten çekinmeyin.</p>
+        `),
+    };
+}

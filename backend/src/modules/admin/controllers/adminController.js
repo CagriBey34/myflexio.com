@@ -4,7 +4,7 @@
  */
 
 import pool from '../../../config/db.js';
-import { sendEmail, mailOnaylandiHasta, mailOnaylandiUzman, mailReddedildiHasta } from '../../../core/notifications/emailService.js';
+import { sendEmail, mailOnaylandiHasta, mailOnaylandiUzman, mailReddedildiHasta, mailIptalHasta, mailIptalUzman, mailUzmanProfilOnaylandi, mailUzmanProfilReddedildi } from '../../../core/notifications/emailService.js';
 import { sendWhatsApp, waOnaylandiHasta, waOnaylandiUzman, waReddedildiHasta } from '../../../core/notifications/whatsappService.js';
 
 /**
@@ -204,7 +204,13 @@ export const updateUzmanApplicationStatus = async (req, res) => {
             });
         }
 
-        // Update user status
+        const [[uzman]] = await pool.query(
+            `SELECT u.email, up.ad, up.soyad FROM users u
+             LEFT JOIN uzman_profiles up ON up.user_id = u.id
+             WHERE u.id = ? AND u.role = 'uzman'`,
+            [id]
+        );
+
         await pool.query(
             'UPDATE users SET status = ? WHERE id = ? AND role = ?',
             [normalizedStatus, id, 'uzman']
@@ -214,6 +220,22 @@ export const updateUzmanApplicationStatus = async (req, res) => {
             success: true,
             message: normalizedStatus === 'active' ? 'Başvuru onaylandı' : 'Başvuru reddedildi'
         });
+
+        if (uzman?.email) {
+            setImmediate(async () => {
+                try {
+                    if (normalizedStatus === 'active') {
+                        const { subject, html } = mailUzmanProfilOnaylandi({ uzmanAd: uzman.ad || uzman.email });
+                        await sendEmail({ to: uzman.email, subject, html });
+                    } else {
+                        const { subject, html } = mailUzmanProfilReddedildi({ uzmanAd: uzman.ad || uzman.email });
+                        await sendEmail({ to: uzman.email, subject, html });
+                    }
+                } catch (e) {
+                    console.error('[Bildirim] Uzman profil bildirim hatası:', e.message);
+                }
+            });
+        }
     } catch (error) {
         console.error('Update application status error:', error);
         res.status(500).json({
@@ -520,13 +542,21 @@ export const updateRandevuDurum = async (req, res) => {
                         await sendWhatsApp({ to: randevu.uzman_telefon, message: waOnaylandiUzman(ctx) });
                     }
                 } else if (durum === 'reddedildi') {
-                    // Sadece hastaya bildirim
                     if (randevu.hasta_email) {
                         const { subject, html } = mailReddedildiHasta(ctx);
                         await sendEmail({ to: randevu.hasta_email, subject, html });
                     }
                     if (randevu.hasta_telefon) {
                         await sendWhatsApp({ to: randevu.hasta_telefon, message: waReddedildiHasta(ctx) });
+                    }
+                } else if (durum === 'iptal') {
+                    if (randevu.hasta_email) {
+                        const { subject, html } = mailIptalHasta(ctx);
+                        await sendEmail({ to: randevu.hasta_email, subject, html });
+                    }
+                    if (randevu.uzman_email) {
+                        const { subject, html } = mailIptalUzman(ctx);
+                        await sendEmail({ to: randevu.uzman_email, subject, html });
                     }
                 }
             } catch (notifErr) {

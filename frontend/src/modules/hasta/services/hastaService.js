@@ -60,6 +60,11 @@ export const getMedicalReports = async () => {
     return response.data;
 };
 
+export const deleteMedicalReport = async (id) => {
+    const response = await api.delete(`/hasta/reports/${id}`);
+    return response.data;
+};
+
 export const getHastaTedaviPlani = async () => {
     const response = await api.get('/hasta/tedavi-plani');
     return response.data;

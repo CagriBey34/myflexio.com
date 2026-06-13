@@ -10,6 +10,7 @@ import {
     getProfile,
     uploadMedicalReport,
     getMedicalReports,
+    deleteMedicalReport,
     createAssessment,
     getAssessments,
     getAssessment,
@@ -81,6 +82,7 @@ router.post(
  * @access  Private (hasta only)
  */
 router.get('/reports', authenticate, getMedicalReports);
+router.delete('/reports/:id', authenticate, deleteMedicalReport);
 
 /**
  * @route   POST /api/hasta/assessment

@@ -293,6 +293,39 @@ export const uploadMedicalReport = async (req, res) => {
 };
 
 /**
+ * Delete medical report
+ * DELETE /api/hasta/reports/:id
+ */
+export const deleteMedicalReport = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { id } = req.params;
+
+        const [profiles] = await pool.execute(
+            'SELECT id FROM hasta_profiles WHERE user_id = ?', [userId]
+        );
+        if (profiles.length === 0) {
+            return res.status(404).json({ success: false, message: 'Hasta profili bulunamadı' });
+        }
+        const profileId = profiles[0].id;
+
+        const [result] = await pool.execute(
+            'DELETE FROM medical_reports WHERE id = ? AND hasta_profile_id = ?',
+            [id, profileId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Rapor bulunamadı' });
+        }
+
+        res.status(200).json({ success: true, message: 'Rapor silindi' });
+    } catch (error) {
+        console.error('Delete report error:', error);
+        res.status(500).json({ success: false, message: 'Rapor silinirken bir hata oluştu' });
+    }
+};
+
+/**
  * Get medical reports
  * GET /api/hasta/reports
  */

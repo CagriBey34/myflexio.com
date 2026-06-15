@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, HeartPulse, ShieldCheck, Activity,
+  ArrowRight, ShieldCheck, Activity,
   Bone, Star, UserCheck, Video, Clock, Globe,
   CheckCircle, BarChart2, Users, Award, Zap,
   Stethoscope, BookOpen, ChevronRight
@@ -80,14 +80,11 @@ export default function Home() {
       {/* ══════════════════════════════════
           NAVBAR
       ══════════════════════════════════ */}
-      <nav className="absolute top-0 left-0 w-full px-6 md:px-16 py-5 flex justify-between items-center z-50">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#4ade80] flex items-center justify-center">
-            <HeartPulse size={18} className="text-[#0a2e1a]" />
-          </div>
-          <span className="text-white text-xl font-black tracking-tight">MyFlexio</span>
-        </div>
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-black/20 backdrop-blur-md p-2 rounded-full">
+      <nav className="fixed top-0 left-0 w-full px-6 md:px-16 py-3 flex justify-between items-center z-50">
+        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="cursor-pointer">
+          <img src="/logo.png" alt="MyFlexio" className="h-26 w-auto brightness-0 invert" />
+        </button>
+        <div className="flex items-center gap-3 bg-black/20 backdrop-blur-md p-2 rounded-full">
           <Link to="/login" className="bg-[#ffff] text-[#0a2e1a] text-sm font-bold px-5 py-2.5 rounded-full hover:bg-[#22c55e] transition-colors">
             Giriş Yap
           </Link>
@@ -374,11 +371,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-white/10">
             <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-[#4ade80] flex items-center justify-center">
-                  <HeartPulse size={18} className="text-[#0a2e1a]" />
-                </div>
-                <span className="text-white text-xl font-black tracking-tight">MyFlexio</span>
+              <div className="mb-4">
+                <img src="/logo.png" alt="MyFlexio" className="h-26 w-auto brightness-0 invert" />
               </div>
               <p className="text-white/50 text-sm leading-relaxed max-w-xs">
                 Uzman fizyoterapistler ile hastalar arasındaki köprü.
@@ -392,9 +386,9 @@ export default function Home() {
           </div>
 
           <div className="mt-3 overflow-hidden">
-            <div className="text-white/5 font-black text-[7rem] md:text-[11rem] leading-none tracking-tighter text-center select-none">
+         {/*    <div className="text-white/5 font-black text-[7rem] md:text-[11rem] leading-none tracking-tighter text-center select-none">
               MyFlexio
-            </div>
+            </div> */}
           </div>
         </div>
       </footer>

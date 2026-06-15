@@ -4,7 +4,7 @@ import { useAuthStore } from '../../shared/store/authStore';
 import {
   LogOut, User, Star,
   ChevronRight, LayoutDashboard,
-  Search, ShieldCheck, HeartPulse, Calendar, Users, Menu, X
+  Search, ShieldCheck, Calendar, Users, Menu, X
 } from 'lucide-react';
 
 export default function DashboardLayout() {
@@ -61,11 +61,8 @@ export default function DashboardLayout() {
 
                 {/* Logo */}
                 <div className="p-6">
-                    <div className="flex items-center gap-3 mb-2 cursor-pointer" onClick={() => navigate('/')}>
-                        <div className="w-9 h-9 bg-[#4ade80] rounded-xl flex items-center justify-center shadow-lg shadow-green-900/50">
-                            <HeartPulse size={20} className="text-[#0a2e1a]" />
-                        </div>
-                        <span className="text-xl font-black text-white tracking-tight">MyFlexio</span>
+                    <div className="cursor-pointer" onClick={() => navigate('/')}>
+                        <img src="/logo.png" alt="MyFlexio" className="h-16 w-auto brightness-0 invert" />
                     </div>
                 </div>
 
@@ -112,11 +109,8 @@ export default function DashboardLayout() {
 
             {/* --- MOBİL TOP HEADER --- */}
             <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[#0a2e1a] text-white px-4 py-3 flex items-center justify-between shadow-lg">
-                <div className="flex items-center gap-2" onClick={() => navigate('/')} style={{cursor:'pointer'}}>
-                    <div className="w-7 h-7 bg-[#4ade80] rounded-lg flex items-center justify-center">
-                        <HeartPulse size={15} className="text-[#0a2e1a]" />
-                    </div>
-                    <span className="text-base font-black tracking-tight">MyFlexio</span>
+                <div className="cursor-pointer" onClick={() => navigate('/')}>
+                    <img src="/logo.png" alt="MyFlexio" className="h-12 w-auto brightness-0 invert" />
                 </div>
                 <button
                     onClick={() => setMobileMenuOpen(v => !v)}

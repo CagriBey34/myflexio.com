@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" fill="none">
+  <!-- Head -->
+  <circle cx="67" cy="13" r="9.5" stroke="#ffffff" stroke-width="3.5"/>
+  <!-- Right arm raised up behind head -->
+  <path d="M63 23 C68 21 77 17 81 10 C84 4 77 1 72 7" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Left shoulder / arm reaching forward -->
+  <path d="M57 34 C48 39 38 44 30 56" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Torso right side (back) -->
+  <path d="M63 23 C71 30 75 42 71 57 C67 70 59 78 55 94" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Torso left side (front) -->
+  <path d="M57 30 C52 40 48 54 46 68 C44 80 46 92 50 107" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Spine vertebrae -->
+  <rect x="55" y="34" width="12" height="8" rx="3" fill="#7bc142"/>
+  <rect x="53" y="45" width="12" height="8" rx="3" fill="#7bc142"/>
+  <rect x="51" y="56" width="12" height="8" rx="3" fill="#7bc142"/>
+  <rect x="49" y="67" width="12" height="8" rx="3" fill="#7bc142"/>
+  <rect x="48" y="78" width="12" height="8" rx="3" fill="#7bc142"/>
+  <rect x="47" y="89" width="12" height="8" rx="3" fill="#7bc142"/>
+</svg>

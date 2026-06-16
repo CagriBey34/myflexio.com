@@ -5,6 +5,54 @@ import {
   ArrowRight, ShieldCheck, Activity,
   Video, CheckCircle, BarChart2, Award, Stethoscope
 } from 'lucide-react';
+import SEO from '../../../../shared/components/SEO';
+
+const homeJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://myflexio.com/#organization',
+      name: 'MyFlexio',
+      url: 'https://myflexio.com/',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://myflexio.com/logo.png',
+      },
+      description: 'Online fizyoterapi ve kişiselleştirilmiş egzersiz platformu.',
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'customer support',
+        availableLanguage: 'Turkish',
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://myflexio.com/#website',
+      url: 'https://myflexio.com/',
+      name: 'MyFlexio',
+      publisher: { '@id': 'https://myflexio.com/#organization' },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://myflexio.com/hasta/uzmanlar?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@type': 'MedicalBusiness',
+      '@id': 'https://myflexio.com/#business',
+      name: 'MyFlexio Online Fizyoterapi',
+      url: 'https://myflexio.com/',
+      description: 'Uzman fizyoterapistler ile hastalar arasındaki dijital köprü. Evden online fizyoterapi seansları ve kişiselleştirilmiş egzersiz programları.',
+      medicalSpecialty: 'Physiotherapy',
+      availableService: [
+        { '@type': 'MedicalTherapy', name: 'Online Fizyoterapi Seansı' },
+        { '@type': 'MedicalTherapy', name: 'Kişiselleştirilmiş Egzersiz Programı' },
+        { '@type': 'MedicalTherapy', name: 'Rehabilitasyon Takibi' },
+      ],
+    },
+  ],
+};
 
 /* ─── Animasyon Varyantları ─────────────────────────────────── */
 const fadeUp = {
@@ -30,10 +78,48 @@ export default function Home() {
 
   return (
     <div ref={containerRef} className="bg-white text-[#0a2e1a] font-sans overflow-x-hidden">
+      <SEO
+        title="Online Fizyoterapi ve Egzersiz Platformu"
+        description="MyFlexio ile evinizin konforunda uzman fizyoterapistler eşliğinde kişiselleştirilmiş egzersiz programlarına ulaşın. Hemen ücretsiz başlayın."
+        canonical="https://myflexio.com/"
+        jsonLd={homeJsonLd}
+      />
 
       {/* ══════════════════════════════════
           NAVBAR
       ══════════════════════════════════ */}
+
+      {/* ── MOBİL: her zaman kompakt tüp, animasyon yok ── */}
+      <div className="md:hidden fixed top-3 left-0 right-0 z-50 flex justify-center px-4">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#4ade80]/20 to-[#22c55e]/20 blur-xl scale-110 pointer-events-none" />
+          <div className="relative flex items-center bg-[#0a2e1a]/92 backdrop-blur-xl rounded-full px-1.5 py-1.5 border border-[#4ade80]/20 shadow-2xl shadow-black/30">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="cursor-pointer px-2"
+            >
+              <img src="/logo.png" alt="MyFlexio" className="h-10 w-auto brightness-0 invert" />
+            </button>
+            <div className="w-px h-5 bg-white/15 mx-1 shrink-0" />
+            <div className="flex items-center gap-1.5 p-0.5">
+              <Link
+                to="/login"
+                className="text-white/80 text-xs font-semibold px-3 py-2 rounded-full hover:bg-white/10 hover:text-white transition-colors min-h-[36px] flex items-center"
+              >
+                Giriş Yap
+              </Link>
+              <Link
+                to="/register"
+                className="bg-[#4ade80] text-[#0a2e1a] text-xs font-bold px-3 py-2 rounded-full hover:bg-[#22c55e] transition-colors min-h-[36px] flex items-center"
+              >
+                Başla
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── DESKTOP: scroll animasyonlu tüp ── */}
       <LayoutGroup>
         <AnimatePresence initial={false}>
           {!isCompact ? (
@@ -41,7 +127,7 @@ export default function Home() {
               key="expanded"
               initial={false}
               exit={{ opacity: 0, transition: { duration: 0.2 } }}
-              className="fixed top-0 left-0 w-full px-4 sm:px-6 md:px-14 py-3 flex justify-between items-center z-50"
+              className="hidden md:flex fixed top-0 left-0 w-full px-14 py-3 justify-between items-center z-50"
             >
               <motion.button
                 layoutId="nav-logo"
@@ -49,7 +135,7 @@ export default function Home() {
                 className="cursor-pointer flex-shrink-0"
                 transition={{ layout: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } }}
               >
-                <img src="/logo.png" alt="MyFlexio" className="h-20 sm:h-22 w-auto brightness-0 invert" />
+                <img src="/logo.png" alt="MyFlexio" className="h-22 w-auto brightness-0 invert" />
               </motion.button>
 
               <motion.div
@@ -59,13 +145,13 @@ export default function Home() {
               >
                 <Link
                   to="/login"
-                  className="bg-white text-[#0a2e1a] text-xs sm:text-sm font-bold px-3 sm:px-5 py-2 sm:py-2.5 rounded-full hover:bg-[#22c55e] hover:text-white transition-colors min-h-[36px] sm:min-h-[40px] flex items-center"
+                  className="bg-white text-[#0a2e1a] text-sm font-bold px-5 py-2.5 rounded-full hover:bg-[#22c55e] hover:text-white transition-colors"
                 >
                   Giriş Yap
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-[#4ade80] text-[#0a2e1a] text-xs sm:text-sm font-bold px-3 sm:px-5 py-2 sm:py-2.5 rounded-full hover:bg-[#22c55e] transition-colors min-h-[36px] sm:min-h-[40px] flex items-center"
+                  className="bg-[#4ade80] text-[#0a2e1a] text-sm font-bold px-5 py-2.5 rounded-full hover:bg-[#22c55e] transition-colors"
                 >
                   Başla
                 </Link>
@@ -77,34 +163,34 @@ export default function Home() {
               initial={{ opacity: 0, y: -14 }}
               animate={{ opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } }}
               exit={{ opacity: 0, y: -14, transition: { duration: 0.22 } }}
-              className="fixed top-3 left-0 right-0 z-50 flex justify-center pointer-events-none px-4"
+              className="hidden md:flex fixed top-4 left-0 right-0 z-50 justify-center pointer-events-none"
             >
-              <div className="pointer-events-auto relative max-w-full">
+              <div className="pointer-events-auto relative">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#4ade80]/20 to-[#22c55e]/20 blur-xl scale-110 pointer-events-none" />
                 <div className="relative flex items-center bg-[#0a2e1a]/92 backdrop-blur-xl rounded-full px-1.5 py-1.5 border border-[#4ade80]/20 shadow-2xl shadow-black/30">
                   <motion.button
                     layoutId="nav-logo"
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className="cursor-pointer px-2 sm:px-3"
+                    className="cursor-pointer px-3"
                     transition={{ layout: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } }}
                   >
-                    <img src="/logo.png" alt="MyFlexio" className="h-12 sm:h-15 w-auto brightness-0 invert" />
+                    <img src="/logo.png" alt="MyFlexio" className="h-18 w-auto brightness-0 invert" />
                   </motion.button>
-                  <div className="w-px h-15 bg-white/15 mx-1 shrink-0" />
+                  <div className="w-px h-6 bg-white/15 mx-1 shrink-0" />
                   <motion.div
                     layoutId="nav-cta"
-                    className="flex items-center gap-1.5 sm:gap-2 p-0.5"
+                    className="flex items-center gap-2 p-0.5"
                     transition={{ layout: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } }}
                   >
                     <Link
                       to="/login"
-                      className="text-white/100 bg-white/10 text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-full hover:bg-white/100 hover:text-[#0a2e1a] transition-colors min-h-[36px] flex items-center"
+                      className="text-white/80 text-sm font-semibold px-4 py-2 rounded-full hover:bg-white/10 hover:text-white transition-colors"
                     >
                       Giriş Yap
                     </Link>
                     <Link
                       to="/register"
-                      className="bg-[#4ade80] text-[#0a2e1a] text-xs sm:text-sm font-bold px-3 sm:px-5 py-2 sm:py-2.5 rounded-full hover:bg-[#22c55e] transition-colors min-h-[36px] flex items-center"
+                      className="bg-[#4ade80] text-[#0a2e1a] text-sm font-bold px-5 py-2.5 rounded-full hover:bg-[#22c55e] transition-colors"
                     >
                       Başla
                     </Link>

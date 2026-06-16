@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /hasta/
+Disallow: /uzman/
+Disallow: /admin/
+
+Sitemap: https://myflexio.com/sitemap.xml

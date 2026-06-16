@@ -5,6 +5,7 @@ import { LogIn, Mail, Lock, CheckCircle2, XCircle, ArrowRight, ShieldCheck } fro
 import { useAuthStore } from '../../../shared/store/authStore';
 import api from '../../../shared/services/api';
 import Button from '../../../shared/components/ui/Button';
+import SEO from '../../../shared/components/SEO';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -39,6 +40,11 @@ export default function Login() {
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center justify-start sm:justify-center px-4 py-6 overflow-y-auto relative bg-white font-sans">
+      <SEO
+        title="Giriş Yap"
+        description="MyFlexio hesabınıza giriş yapın. Uzman fizyoterapistlerle bağlantı kurun, randevu alın ve egzersiz programlarınıza ulaşın."
+        canonical="https://myflexio.com/login"
+      />
 
       {/* Arka plan blurlar */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">

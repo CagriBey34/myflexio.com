@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { UserCircle, Stethoscope, CheckCircle2, ArrowRight, ShieldCheck, HeartPulse } from 'lucide-react';
+import SEO from '../../../shared/components/SEO';
 
 const fadeUp = {
   hidden: { y: 20, opacity: 0 },
@@ -15,6 +16,11 @@ const containerStagger = {
 export default function Register() {
   return (
     <div className="min-h-screen w-full bg-white flex flex-col items-center justify-start sm:justify-center px-4 py-6 sm:py-8 font-sans overflow-y-auto relative">
+      <SEO
+        title="Ücretsiz Kaydol"
+        description="MyFlexio'ya ücretsiz kaydolun. Hasta veya fizyoterapist olarak platforma katılın, online seans alın veya verin."
+        canonical="https://myflexio.com/register"
+      />
 
       {/* Arka plan blurlar */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">

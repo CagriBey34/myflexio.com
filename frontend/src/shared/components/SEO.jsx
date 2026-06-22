@@ -4,7 +4,7 @@ export default function SEO({
   title,
   description,
   canonical,
-  image = 'https://myflexio.com/assets/og-image.jpg',
+  image = 'https://myflexio.com/logo.png',
   type = 'website',
   jsonLd,
 }) {

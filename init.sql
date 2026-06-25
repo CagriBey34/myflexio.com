@@ -161,7 +161,7 @@ CREATE TABLE `hasta_profiles` (
 CREATE TABLE `medical_reports` (
   `id` int NOT NULL,
   `hasta_profile_id` int NOT NULL,
-  `tip` enum('mr','rontgen','kan_tahlili','diger') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tip` enum('mri','rontgen','ultrason','kan_tahlili','diger') COLLATE utf8mb4_unicode_ci NOT NULL,
   `dosya_url` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
   `aciklama` text COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP

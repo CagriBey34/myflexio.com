@@ -98,7 +98,7 @@ export default function HastaEditProfile() {
 
     const RAPOR_TIPLERI = [
         { value: 'mri', label: 'MRI' },
-        { value: 'röntgen', label: 'Röntgen' },
+        { value: 'rontgen', label: 'Röntgen' },
         { value: 'ultrason', label: 'Ultrason' },
         { value: 'kan_tahlili', label: 'Kan Tahlili' },
         { value: 'diger', label: 'Diğer' },
@@ -675,15 +675,11 @@ export default function HastaEditProfile() {
                             )}
                             {currentStep === 3 && (
                                 <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white font-bold px-8 py-4 rounded-full hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-200 text-sm disabled:opacity-70"
+                                    type="button"
+                                    onClick={(e) => { e.preventDefault(); handleNext(); }}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white font-bold px-8 py-4 rounded-full hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-200 text-sm"
                                 >
-                                    {loading ? (
-                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    ) : (
-                                        <><Save size={18} /> Kaydet & Devam Et</>
-                                    )}
+                                    Devam Et <ChevronRight size={18} />
                                 </button>
                             )}
                             {currentStep === 4 && (
